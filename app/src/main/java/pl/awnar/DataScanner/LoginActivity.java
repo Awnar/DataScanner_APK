@@ -2,19 +2,15 @@ package pl.awnar.DataScanner;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.io.Serializable;
-import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -146,7 +142,7 @@ public class LoginActivity extends AppCompatActivity implements Observer {
             if (rec.ERROR == null) {
                 API.SetToken(rec.Authorization);
                 Intent myIntent = new Intent(this, MainActivity.class);
-                myIntent.putExtra("home", (Serializable) data);
+                myIntent.putExtra("home", (Parcelable) data);
                 startActivity(myIntent);
             } else {
                 ((TextView) findViewById(R.id.ERROR)).setText(rec.ERROR);
