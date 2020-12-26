@@ -1,4 +1,4 @@
-package pl.awnar.qrscanner.api;
+package pl.awnar.DataScanner.api;
 
 import android.annotation.SuppressLint;
 import android.widget.Toast;
@@ -8,9 +8,9 @@ import org.jetbrains.annotations.NotNull;
 import java.security.MessageDigest;
 import java.util.Observable;
 
-import pl.awnar.qrscanner.LoginActivity;
-import pl.awnar.qrscanner.api.model.home;
-import pl.awnar.qrscanner.api.model.loginRecive;
+import pl.awnar.DataScanner.LoginActivity;
+import pl.awnar.DataScanner.api.model.home;
+import pl.awnar.DataScanner.api.model.loginRecive;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;

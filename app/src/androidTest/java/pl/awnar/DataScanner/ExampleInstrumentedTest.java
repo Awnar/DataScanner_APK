@@ -1,4 +1,4 @@
-package pl.awnar.qrscanner;
+package pl.awnar.DataScanner;
 
 import android.content.Context;
 

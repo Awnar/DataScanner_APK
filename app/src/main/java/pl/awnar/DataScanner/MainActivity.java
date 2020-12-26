@@ -1,4 +1,4 @@
-package pl.awnar.qrscanner;
+package pl.awnar.DataScanner;
 
 import android.os.Bundle;
 
@@ -13,7 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import pl.awnar.qrscanner.ui.main.SectionsPagerAdapter;
+import pl.awnar.DataScanner.ui.main.SectionsPagerAdapter;
 
 public class MainActivity extends AppCompatActivity {
 

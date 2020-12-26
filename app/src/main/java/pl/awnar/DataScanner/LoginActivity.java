@@ -1,4 +1,4 @@
-package pl.awnar.qrscanner;
+package pl.awnar.DataScanner;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,9 +17,9 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
-import pl.awnar.qrscanner.api.API;
-import pl.awnar.qrscanner.api.model.home;
-import pl.awnar.qrscanner.api.model.loginRecive;
+import pl.awnar.DataScanner.api.API;
+import pl.awnar.DataScanner.api.model.home;
+import pl.awnar.DataScanner.api.model.loginRecive;
 
 
 public class LoginActivity extends AppCompatActivity implements Observer {
@@ -149,8 +149,8 @@ public class LoginActivity extends AppCompatActivity implements Observer {
                 API.SetToken(rec.Authorization);
                 API.SetPoint(data.url.get(((Integer) spinner.getSelectedItemPosition()).toString()));
 
-                Intent myIntent = new Intent(this, MainActivity.class);
-                startActivity(myIntent);
+                //Intent myIntent = new Intent(this, MainActivity.class);
+                //startActivity(myIntent);
             }else{
                 ((TextView) findViewById(R.id.ERROR)).setText(rec.Error);
             }

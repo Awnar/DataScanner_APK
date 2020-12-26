@@ -1,4 +1,4 @@
-package pl.awnar.qrscanner.api.model;
+package pl.awnar.DataScanner.api.model;
 
 import java.util.Map;
 

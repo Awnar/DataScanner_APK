@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">QR Scanner</string>
+    <string name="app_name">Data Scanner</string>
     <string name="action_sign_in">Zaloguj</string>
     <string name="action_register">Zarejestruj</string>
     <string name="prompt_password">Hasło</string>
