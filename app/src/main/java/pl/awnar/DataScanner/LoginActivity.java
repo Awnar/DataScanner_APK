@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
@@ -24,7 +25,6 @@ import pl.awnar.DataScanner.api.model.loginRecive;
 
 public class LoginActivity extends AppCompatActivity implements Observer {
 
-    private Spinner spinner;
     private home data;
 
     @Override
@@ -47,13 +47,16 @@ public class LoginActivity extends AppCompatActivity implements Observer {
         final EditText passwordEditText = findViewById(R.id.password);
         final Button loginButton = findViewById(R.id.login);
         final Button registerButton = findViewById(R.id.register);
-        spinner = findViewById(R.id.spinner);
 
         usernameEditText.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
             @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
             @Override
             public void afterTextChanged(Editable editable) {
                 boolean enable = !editable.toString().trim().isEmpty() && !passwordEditText.getText().toString().trim().isEmpty();
@@ -64,9 +67,13 @@ public class LoginActivity extends AppCompatActivity implements Observer {
 
         passwordEditText.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
             @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
             @Override
             public void afterTextChanged(Editable editable) {
                 boolean enable = !editable.toString().trim().isEmpty() && !usernameEditText.getText().toString().trim().isEmpty();
@@ -104,21 +111,18 @@ public class LoginActivity extends AppCompatActivity implements Observer {
         });
 
         TextView.OnEditorActionListener editorListener = (v, actionId, event) -> {
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                String username = usernameEditText.getText().toString().trim();
-                if (username.isEmpty()) {
-                    ((TextView) findViewById(R.id.ERROR)).setText(R.string.username_empty);
-                    return false;
-                }
-                String password = passwordEditText.getText().toString().trim();
-                if (password.length() < 4) {
-                    ((TextView) findViewById(R.id.ERROR)).setText(R.string.password_short);
-                    return false;
-                }
-                login.Run(username, password);
-                return true;
+            String username = usernameEditText.getText().toString().trim();
+            if (username.isEmpty()) {
+                ((TextView) findViewById(R.id.ERROR)).setText(R.string.username_empty);
+                return false;
             }
-            return false;
+            String password = passwordEditText.getText().toString().trim();
+            if (password.length() < 4) {
+                ((TextView) findViewById(R.id.ERROR)).setText(R.string.password_short);
+                return false;
+            }
+            login.Run(username, password);
+            return true;
         };
 
         passwordEditText.setOnEditorActionListener(editorListener);
@@ -132,12 +136,6 @@ public class LoginActivity extends AppCompatActivity implements Observer {
                 return;
             }
             data = (home) o;
-            ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, android.R.id.text1);
-            spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spinner.setAdapter(spinnerAdapter);
-            for (Map.Entry<String, String> entry : data.name.entrySet())
-                spinnerAdapter.add(entry.getValue());
-            spinnerAdapter.notifyDataSetChanged();
         }
         if (observable instanceof API.Login || observable instanceof API.Register) {
             if (o == null) {
@@ -145,14 +143,13 @@ public class LoginActivity extends AppCompatActivity implements Observer {
                 return;
             }
             loginRecive rec = (loginRecive) o;
-            if (rec.Error == null) {
+            if (rec.ERROR == null) {
                 API.SetToken(rec.Authorization);
-                API.SetPoint(data.url.get(((Integer) spinner.getSelectedItemPosition()).toString()));
-
-                //Intent myIntent = new Intent(this, MainActivity.class);
-                //startActivity(myIntent);
-            }else{
-                ((TextView) findViewById(R.id.ERROR)).setText(rec.Error);
+                Intent myIntent = new Intent(this, MainActivity.class);
+                myIntent.putExtra("home", (Serializable) data);
+                startActivity(myIntent);
+            } else {
+                ((TextView) findViewById(R.id.ERROR)).setText(rec.ERROR);
             }
         }
     }
