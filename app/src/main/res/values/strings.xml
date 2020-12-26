@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">QR Scanner</string>
+    <string name="action_sign_in">Zaloguj</string>
+    <string name="action_register">Zarejestruj</string>
+    <string name="prompt_password">Hasło</string>
+    <string name="action_sign_in_short">Zaloguj</string>
+    <string name="prompt_login">Nazwa</string>
+    <string name="connect_error">Błąd z połączeniem</string>
+    <string name="username_empty">Pusty login</string>
+    <string name="password_short">Za krótkie hasło</string>
+    <string name="bad_login_data">Złe dane logowania</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="tab_text_1">Tab 1</string>
+    <string name="tab_text_2">Tab 2</string>
+</resources>
