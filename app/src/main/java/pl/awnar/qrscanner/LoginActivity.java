@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -75,39 +75,53 @@ public class LoginActivity extends AppCompatActivity implements Observer {
             }
         });
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String username = usernameEditText.getText().toString().trim();
-                if (username.isEmpty()) {
-                    ((TextView) findViewById(R.id.ERROR)).setText(R.string.username_empty);
-                    return;
-                }
-                String password = passwordEditText.getText().toString().trim();
-                if (password.length() < 4) {
-                    ((TextView) findViewById(R.id.ERROR)).setText(R.string.password_short);
-                    return;
-                }
-                login.Run(username, password);
+        loginButton.setOnClickListener(view -> {
+            String username = usernameEditText.getText().toString().trim();
+            if (username.isEmpty()) {
+                ((TextView) findViewById(R.id.ERROR)).setText(R.string.username_empty);
+                return;
             }
+            String password = passwordEditText.getText().toString().trim();
+            if (password.length() < 4) {
+                ((TextView) findViewById(R.id.ERROR)).setText(R.string.password_short);
+                return;
+            }
+            login.Run(username, password);
         });
 
-        registerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        registerButton.setOnClickListener(view -> {
+            String username = usernameEditText.getText().toString().trim();
+            if (username.isEmpty()) {
+                ((TextView) findViewById(R.id.ERROR)).setText(R.string.username_empty);
+                return;
+            }
+            String password = passwordEditText.getText().toString().trim();
+            if (password.length() < 4) {
+                ((TextView) findViewById(R.id.ERROR)).setText(R.string.password_short);
+                return;
+            }
+            register.Run(username, password);
+        });
+
+        TextView.OnEditorActionListener editorListener = (v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
                 String username = usernameEditText.getText().toString().trim();
                 if (username.isEmpty()) {
                     ((TextView) findViewById(R.id.ERROR)).setText(R.string.username_empty);
-                    return;
+                    return false;
                 }
                 String password = passwordEditText.getText().toString().trim();
                 if (password.length() < 4) {
                     ((TextView) findViewById(R.id.ERROR)).setText(R.string.password_short);
-                    return;
+                    return false;
                 }
-                register.Run(username, password);
+                login.Run(username, password);
+                return true;
             }
-        });
+            return false;
+        };
+
+        passwordEditText.setOnEditorActionListener(editorListener);
     }
 
     @Override
@@ -118,7 +132,7 @@ public class LoginActivity extends AppCompatActivity implements Observer {
                 return;
             }
             data = (home) o;
-            ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, android.R.id.text1);
+            ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, android.R.id.text1);
             spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinner.setAdapter(spinnerAdapter);
             for (Map.Entry<String, String> entry : data.name.entrySet())

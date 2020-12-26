@@ -1,6 +1,9 @@
 package pl.awnar.qrscanner.api;
 
+import android.annotation.SuppressLint;
 import android.widget.Toast;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.security.MessageDigest;
 import java.util.Observable;
@@ -22,6 +25,7 @@ public class API {
     static private String TOKEN = "";
     static private String API_POINT = "";
     static final private String API_URL = "http://192.168.1.11:5000";
+    @SuppressLint("StaticFieldLeak")
     static private LoginActivity mActivity;
     static private Retrofit retrofit = null;
 
@@ -58,7 +62,7 @@ public class API {
         }
 
         @Override
-        public void onResponse(Call<home> call, Response<home> response) {
+        public void onResponse(@NotNull Call<home> call, Response<home> response) {
             setChanged();
             if (response.isSuccessful())
                 notifyObservers(response.body());
@@ -67,7 +71,7 @@ public class API {
         }
 
         @Override
-        public void onFailure(Call<home> call, Throwable t) {
+        public void onFailure(@NotNull Call<home> call, Throwable t) {
             setChanged();
             notifyObservers(null);
             Toast toast = Toast.makeText(mActivity.getApplicationContext(), t.getMessage(), Toast.LENGTH_LONG);
@@ -86,7 +90,7 @@ public class API {
                 MessageDigest md = MessageDigest.getInstance("MD5");
                 md.update(pass.getBytes());
                 LoginIF req = retrofit.create(LoginIF.class);
-                Call<loginRecive> call = req.LoginF(name, bytesToHex(md.digest()));
+                Call<loginRecive> call = req.loginIF(name, bytesToHex(md.digest()));
                 call.enqueue(this);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -108,7 +112,7 @@ public class API {
         }
 
         @Override
-        public void onResponse(Call<loginRecive> call, Response<loginRecive> response) {
+        public void onResponse(@NotNull Call<loginRecive> call, Response<loginRecive> response) {
             setChanged();
             if (response.isSuccessful())
                 notifyObservers(response.body());
@@ -117,7 +121,7 @@ public class API {
         }
 
         @Override
-        public void onFailure(Call<loginRecive> call, Throwable t) {
+        public void onFailure(@NotNull Call<loginRecive> call, Throwable t) {
             setChanged();
             notifyObservers(null);
             Toast toast = Toast.makeText(mActivity.getApplicationContext(), t.getMessage(), Toast.LENGTH_LONG);
@@ -127,7 +131,7 @@ public class API {
         private interface LoginIF {
             @Multipart
             @POST("login")
-            Call<loginRecive> LoginF(
+            Call<loginRecive> loginIF(
                     @Part("name") String name,
                     @Part("pass") String pass
             );
@@ -140,7 +144,7 @@ public class API {
                 MessageDigest md = MessageDigest.getInstance("MD5");
                 md.update(pass.getBytes());
                 RegIF req = retrofit.create(RegIF.class);
-                Call<loginRecive> call = req.RegIF(name, bytesToHex(md.digest()));
+                Call<loginRecive> call = req.regIF(name, bytesToHex(md.digest()));
                 call.enqueue(this);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -162,7 +166,7 @@ public class API {
         }
 
         @Override
-        public void onResponse(Call<loginRecive> call, Response<loginRecive> response) {
+        public void onResponse(@NotNull Call<loginRecive> call, Response<loginRecive> response) {
             setChanged();
             if (response.isSuccessful())
                 notifyObservers(response.body());
@@ -171,7 +175,7 @@ public class API {
         }
 
         @Override
-        public void onFailure(Call<loginRecive> call, Throwable t) {
+        public void onFailure(@NotNull Call<loginRecive> call, Throwable t) {
             setChanged();
             notifyObservers(null);
             Toast toast = Toast.makeText(mActivity.getApplicationContext(), t.getMessage(), Toast.LENGTH_LONG);
@@ -181,7 +185,7 @@ public class API {
         private interface RegIF {
             @Multipart
             @POST("register")
-            Call<loginRecive> RegIF(
+            Call<loginRecive> regIF(
                     @Part("name") String name,
                     @Part("pass") String pass
             );
