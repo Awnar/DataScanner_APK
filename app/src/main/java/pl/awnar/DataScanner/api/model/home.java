@@ -3,7 +3,6 @@ package pl.awnar.DataScanner.api.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
