@@ -16,18 +16,20 @@ public class DB extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL(SQL_CREATE_DATA);
+        sqLiteDatabase.execSQL(SQL_CREATE_MODULE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
         sqLiteDatabase.execSQL(SQL_DELETE_DATA);
+        sqLiteDatabase.execSQL(SQL_DELETE_MODULE);
         onCreate(sqLiteDatabase);
     }
 
-    public static class QRColumns implements BaseColumns {
+    public static class DataColumns implements BaseColumns {
         static final String TABLE_NAME = "Data";
         static final String COLUMN_NAME_SERVER_ID = "server ID";
-        static final String COLUMN_NAME_MODULE = "Module name";
+        static final String COLUMN_NAME_MODULE = "Module ID";
         static final String COLUMN_NAME_IN_DATA = "InputData";
         static final String COLUMN_NAME_IN_TYPE = "InputType";
         static final String COLUMN_NAME_OUT_DATA = "OutputData";
@@ -36,18 +38,33 @@ public class DB extends SQLiteOpenHelper {
         static final String COLUMN_NAME_Update = "Update data";
     }
 
+    public static class ModuleColumns implements BaseColumns {
+        static final String TABLE_NAME = "Module";
+        static final String COLUMN_NAME_NAME = "name";
+        static final String COLUMN_NAME_URL = "url";
+    }
+
     private static final String SQL_CREATE_DATA =
-            "CREATE TABLE " + QRColumns.TABLE_NAME + " (" +
-                    QRColumns._ID + " INTEGER PRIMARY KEY," +
-                    QRColumns.COLUMN_NAME_SERVER_ID + " INTEGER," +
-                    QRColumns.COLUMN_NAME_MODULE + " TEXT," +
-                    QRColumns.COLUMN_NAME_IN_DATA + " BLOB," +
-                    QRColumns.COLUMN_NAME_IN_TYPE + " TEXT," +
-                    QRColumns.COLUMN_NAME_OUT_DATA + " BLOB," +
-                    QRColumns.COLUMN_NAME_OUT_TYPE + " TEXT," +
-                    QRColumns.COLUMN_NAME_CREATE + " DATE," +
-                    QRColumns.COLUMN_NAME_Update + " DATE)";
+            "CREATE TABLE " + DataColumns.TABLE_NAME + " (" +
+                    DataColumns._ID + " INTEGER PRIMARY KEY," +
+                    DataColumns.COLUMN_NAME_SERVER_ID + " INTEGER UNIQUE," +
+                    DataColumns.COLUMN_NAME_MODULE + " INTEGER REFERENCES "+ModuleColumns.TABLE_NAME+" ("+ModuleColumns._ID+")," +
+                    DataColumns.COLUMN_NAME_IN_DATA + " BLOB," +
+                    DataColumns.COLUMN_NAME_IN_TYPE + " TEXT," +
+                    DataColumns.COLUMN_NAME_OUT_DATA + " BLOB," +
+                    DataColumns.COLUMN_NAME_OUT_TYPE + " TEXT," +
+                    DataColumns.COLUMN_NAME_CREATE + " DATE," +
+                    DataColumns.COLUMN_NAME_Update + " DATE)";
+
+    private static final String SQL_CREATE_MODULE =
+            "CREATE TABLE " + ModuleColumns.TABLE_NAME + " (" +
+                    ModuleColumns._ID + " INTEGER PRIMARY KEY," +
+                    ModuleColumns.COLUMN_NAME_NAME + " TEXT," +
+                    ModuleColumns.COLUMN_NAME_URL + " TEXT UNIQUE";
 
     private static final String SQL_DELETE_DATA =
-            "DROP TABLE IF EXISTS " + QRColumns.TABLE_NAME;
+            "DROP TABLE IF EXISTS " + DataColumns.TABLE_NAME;
+
+    private static final String SQL_DELETE_MODULE =
+            "DROP TABLE IF EXISTS " + ModuleColumns.TABLE_NAME;
 }
