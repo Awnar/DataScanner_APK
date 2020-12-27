@@ -9,6 +9,9 @@ import androidx.fragment.app.FragmentPagerAdapter;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
+import java.util.Set;
+
 import pl.awnar.DataScanner.api.model.home;
 
 /**
@@ -18,9 +21,9 @@ import pl.awnar.DataScanner.api.model.home;
 public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
     private final Context mContext;
-    private final home data;
+    private final Map<Integer, String> data;
 
-    public SectionsPagerAdapter(Context context, FragmentManager fm, home data) {
+    public SectionsPagerAdapter(Context context, FragmentManager fm, Map<Integer, String> data) {
         super(fm, FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
         mContext = context;
         this.data = data;
@@ -37,13 +40,12 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
     @Nullable
     @Override
     public CharSequence getPageTitle(int position) {
-        return data.name.get(Integer.toString(position));
+        int key = (int) data.keySet().toArray()[position];
+        return data.get(key);
     }
 
     @Override
     public int getCount() {
-        int tmp = data.name.size();
-        if (tmp == data.url.size()) return tmp;
-        return 0;
+        return data.size();
     }
 }

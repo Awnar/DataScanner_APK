@@ -14,6 +14,8 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -82,6 +84,8 @@ public class LoginActivity extends AppCompatActivity implements Observer {
         });
 
         loginButton.setOnClickListener(view -> {
+            if(isdata()) return;
+
             String username = usernameEditText.getText().toString().trim();
             if (username.isEmpty()) {
                 ((TextView) findViewById(R.id.ERROR)).setText(R.string.username_empty);
@@ -96,6 +100,8 @@ public class LoginActivity extends AppCompatActivity implements Observer {
         });
 
         registerButton.setOnClickListener(view -> {
+            if(isdata()) return;
+
             String username = usernameEditText.getText().toString().trim();
             if (username.isEmpty()) {
                 ((TextView) findViewById(R.id.ERROR)).setText(R.string.username_empty);
@@ -110,6 +116,8 @@ public class LoginActivity extends AppCompatActivity implements Observer {
         });
 
         TextView.OnEditorActionListener editorListener = (v, actionId, event) -> {
+            if(isdata()) return false;
+
             String username = usernameEditText.getText().toString().trim();
             if (username.isEmpty()) {
                 ((TextView) findViewById(R.id.ERROR)).setText(R.string.username_empty);
@@ -128,18 +136,27 @@ public class LoginActivity extends AppCompatActivity implements Observer {
         passwordEditText.setOnEditorActionListener(editorListener);
     }
 
+    private boolean isdata(){
+        if (data != null && data.endpoints != null)
+            return false;
+        ((TextView) findViewById(R.id.ERROR)).setText(R.string.connect_error);
+        return true;
+    }
+
     @Override
     public void update(Observable observable, Object o) {
         if (observable instanceof API.Home) {
-            if (o == null) {
+            data = (home)o;
+            if (data == null || data.endpoints == null) {
+                data = null;
                 ((TextView) findViewById(R.id.ERROR)).setText(R.string.connect_error);
                 return;
             }
-            data = (home) o;
+            prepareHome(data);
         }
         if (observable instanceof API.Login || observable instanceof API.Register) {
             if (o == null) {
-                ((TextView) findViewById(R.id.ERROR)).setText(R.string.bad_login_data);
+                ((TextView) findViewById(R.id.ERROR)).setText(R.string.connect_error);
                 return;
             }
             loginRecive rec = (loginRecive) o;
@@ -152,6 +169,18 @@ public class LoginActivity extends AppCompatActivity implements Observer {
                 ((TextView) findViewById(R.id.ERROR)).setText(rec.ERROR);
             }
         }
+    }
+
+    private void prepareHome(home data){
+        ArrayList<String> toDelete = new ArrayList<>();
+        for (Map.Entry<String, Map<String,String>> entry : data.endpoints.entrySet()) {
+            if (entry.getValue().containsKey("name") && entry.getValue().containsKey("url"))
+                if (!entry.getValue().get("name").equals("") && !entry.getValue().get("url").equals(""))
+                    continue;
+            toDelete.add(entry.getKey());
+        }
+        for (String object: toDelete)
+            data.endpoints.remove(object);
     }
 
     public static void hideKeyboard(Activity activity) {

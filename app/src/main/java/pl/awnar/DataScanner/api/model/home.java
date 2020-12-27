@@ -6,21 +6,17 @@ import android.os.Parcelable;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class home implements Parcelable {
-    public Map<String, String> name;
-    public Map<String, String> url;
+public class home implements Parcelable{
+    public Map<String, Map<String,String>> endpoints;
 
     protected home(Parcel in) {
-        name = new TreeMap<String, String>();
-        in.readMap(name, home.class.getClassLoader());
-        url = new TreeMap<String, String>();
-        in.readMap(url, home.class.getClassLoader());
+        endpoints = new TreeMap<>();
+        in.readMap(endpoints, home.class.getClassLoader());
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeMap(name);
-        dest.writeMap(url);
+        dest.writeMap(endpoints);
     }
 
     @Override
