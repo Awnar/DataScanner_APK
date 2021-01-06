@@ -11,4 +11,5 @@
     <string name="bad_login_data">Złe dane logowania</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="pick_image_intent_text">Wybierz obraz</string>
+    <string name="any_error">Coś poszło nie tak</string>
 </resources>

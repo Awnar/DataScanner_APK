@@ -24,9 +24,6 @@ public class DB extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        sqLiteDatabase.execSQL(SQL_DELETE_DATA);
-        sqLiteDatabase.execSQL(SQL_DELETE_MODULE);
-
         sqLiteDatabase.execSQL(SQL_CREATE_MODULE);
         sqLiteDatabase.execSQL(SQL_CREATE_DATA);
     }
@@ -112,6 +109,13 @@ public class DB extends SQLiteOpenHelper {
             } while (cursor.moveToNext());
         }
         return dbmap;
+    }
+
+    public void Clear(){
+        SQLiteDatabase DB = this.getWritableDatabase();
+        DB.execSQL(SQL_DELETE_DATA);
+        DB.execSQL(SQL_DELETE_MODULE);
+        onCreate(DB);
     }
 
     private static class DataColumns implements BaseColumns {

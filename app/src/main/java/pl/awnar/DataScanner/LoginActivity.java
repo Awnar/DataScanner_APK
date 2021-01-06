@@ -11,6 +11,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -27,6 +28,7 @@ import pl.awnar.DataScanner.api.model.loginRecive;
 public class LoginActivity extends AppCompatActivity implements Observer {
 
     private home data;
+    private String name;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +99,7 @@ public class LoginActivity extends AppCompatActivity implements Observer {
                 return;
             }
             login.Run(username, password);
+            name = username;
         });
 
         registerButton.setOnClickListener(view -> {
@@ -130,6 +133,7 @@ public class LoginActivity extends AppCompatActivity implements Observer {
             }
             hideKeyboard(this);
             login.Run(username, password);
+            name = username;
             return true;
         };
 
@@ -161,9 +165,14 @@ public class LoginActivity extends AppCompatActivity implements Observer {
             }
             loginRecive rec = (loginRecive) o;
             if (rec.ERROR == null) {
+                if (name==null){
+                    Toast.makeText(this, R.string.any_error,Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 API.SetToken(rec.Authorization);
                 Intent myIntent = new Intent(this, MainActivity.class);
-                myIntent.putExtra("home", (Parcelable) data);
+                myIntent.putExtra("home", data);
+                myIntent.putExtra("name", name);
                 startActivity(myIntent);
             } else {
                 ((TextView) findViewById(R.id.ERROR)).setText(rec.ERROR);

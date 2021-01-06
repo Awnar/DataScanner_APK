@@ -3,6 +3,7 @@ package pl.awnar.DataScanner;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -27,16 +28,23 @@ import pl.awnar.DataScanner.ui.main.SectionsPagerAdapter;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int IMAGE_PICK_REQUEST = 111;
     private Image image;
+    private SharedPreferences sharedPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        home data = getIntent().getExtras().getParcelable("home");
         DB db = new DB(this);
+
+        sharedPref = getSharedPreferences("userInfo", MODE_PRIVATE);
+        String name = getIntent().getStringExtra("name");
+        if (!name.equals(sharedPref.getString("user_name", "")))
+            db.Clear();
+        sharedPref.edit().putString("user_id", name).apply();
+
+        home data = getIntent().getExtras().getParcelable("home");
         db.Module(data);
 
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager(), db.getModules());
