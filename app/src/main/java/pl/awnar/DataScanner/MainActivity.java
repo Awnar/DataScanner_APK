@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
         String name = getIntent().getStringExtra("name");
         if (!name.equals(sharedPref.getString("user_name", "")))
             db.Clear();
-        sharedPref.edit().putString("user_id", name).apply();
+        sharedPref.edit().putString("user_name", name).apply();
 
         home data = getIntent().getExtras().getParcelable("home");
         db.Module(data);
