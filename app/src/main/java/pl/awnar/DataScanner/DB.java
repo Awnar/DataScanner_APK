@@ -52,8 +52,7 @@ public class DB extends SQLiteOpenHelper {
                 tmp.put("url", url);
                 dbmap.put(id, tmp);
             } while (cursor.moveToNext());
-        }
-        else {
+        } else {
             for (Map.Entry<String, Map<String, String>> entry : data.endpoints.entrySet()) {
                 ContentValues contentValue = new ContentValues();
                 contentValue.put(ModuleColumns._ID, entry.getKey());
@@ -81,7 +80,7 @@ public class DB extends SQLiteOpenHelper {
             ContentValues contentValue = new ContentValues();
             contentValue.put(ModuleColumns._ID, s);
             Map<String, String> tmp = data.endpoints.get(s);
-            contentValue.put(ModuleColumns.COLUMN_NAME_NAME,  tmp.get("name"));
+            contentValue.put(ModuleColumns.COLUMN_NAME_NAME, tmp.get("name"));
             contentValue.put(ModuleColumns.COLUMN_NAME_URL, tmp.get("url"));
             DB.insert(ModuleColumns.TABLE_NAME, null, contentValue);
         }
@@ -89,12 +88,12 @@ public class DB extends SQLiteOpenHelper {
         for (Map.Entry<String, Map<String, String>> stringMapEntry : data.endpoints.entrySet()) {
             ContentValues contentValues = new ContentValues();
             contentValues.put(ModuleColumns.COLUMN_NAME_NAME, stringMapEntry.getValue().get("name"));
-            contentValues.put(ModuleColumns.COLUMN_NAME_URL,  stringMapEntry.getValue().get("url"));
+            contentValues.put(ModuleColumns.COLUMN_NAME_URL, stringMapEntry.getValue().get("url"));
             DB.update(ModuleColumns.TABLE_NAME, contentValues, ModuleColumns._ID + " = " + stringMapEntry.getKey(), null);
         }
     }
 
-    public Map<Integer, String[]> getModules(){
+    public Map<Integer, String[]> getModules() {
         SQLiteDatabase DB = this.getWritableDatabase();
         String[] columns = {ModuleColumns._ID, ModuleColumns.COLUMN_NAME_NAME, ModuleColumns.COLUMN_NAME_URL};
         @SuppressLint("Recycle") Cursor cursor = DB.query(ModuleColumns.TABLE_NAME, columns, null, null, null, null, null);
@@ -113,7 +112,7 @@ public class DB extends SQLiteOpenHelper {
         return dbmap;
     }
 
-    public void Clear(){
+    public void Clear() {
         SQLiteDatabase DB = this.getWritableDatabase();
         DB.execSQL(SQL_DELETE_DATA);
         DB.execSQL(SQL_DELETE_MODULE);
@@ -122,8 +121,8 @@ public class DB extends SQLiteOpenHelper {
 
     private static class DataColumns implements BaseColumns {
         static final String TABLE_NAME = "Data";
-        static final String COLUMN_NAME_SERVER_ID = "server ID";
-        static final String COLUMN_NAME_MODULE = "Module ID";
+        static final String COLUMN_NAME_SERVER_ID = "server_ID";
+        static final String COLUMN_NAME_MODULE = "Module_ID";
         static final String COLUMN_NAME_IN_DATA = "InputData";
         static final String COLUMN_NAME_IN_TYPE = "InputType";
         static final String COLUMN_NAME_OUT_DATA = "OutputData";
@@ -142,7 +141,7 @@ public class DB extends SQLiteOpenHelper {
             "CREATE TABLE " + DataColumns.TABLE_NAME + " (" +
                     DataColumns._ID + " INTEGER PRIMARY KEY," +
                     DataColumns.COLUMN_NAME_SERVER_ID + " INTEGER UNIQUE," +
-                    DataColumns.COLUMN_NAME_MODULE + " INTEGER REFERENCES "+ModuleColumns.TABLE_NAME+" ("+ModuleColumns._ID+")," +
+                    DataColumns.COLUMN_NAME_MODULE + " INTEGER REFERENCES " + ModuleColumns.TABLE_NAME + " (" + ModuleColumns._ID + ")," +
                     DataColumns.COLUMN_NAME_IN_DATA + " BLOB," +
                     DataColumns.COLUMN_NAME_IN_TYPE + " TEXT," +
                     DataColumns.COLUMN_NAME_OUT_DATA + " BLOB," +

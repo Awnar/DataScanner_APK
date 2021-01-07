@@ -1,5 +1,7 @@
 package pl.awnar.DataScanner.ui.main;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,17 +16,21 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import java.util.Observable;
+
 import pl.awnar.DataScanner.R;
 import pl.awnar.DataScanner.api.API;
+import pl.awnar.DataScanner.api.model.home;
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class PlaceholderFragment extends Fragment {
+public class PlaceholderFragment extends Fragment implements java.util.Observer {
 
     private static final String ARG_SECTION_NUMBER = "section_number";
     private static final String ARG_SECTION_URL = "section_url";
-
+    @SuppressLint("StaticFieldLeak")
+    private static Activity mActivity;
     private PageViewModel pageViewModel;
 
     public static PlaceholderFragment newInstance(int index, String url) {
@@ -34,6 +40,10 @@ public class PlaceholderFragment extends Fragment {
         bundle.putString(ARG_SECTION_URL, url);
         fragment.setArguments(bundle);
         return fragment;
+    }
+
+    public static void setActivity(Activity activity) {
+        mActivity = activity;
     }
 
     @Override
@@ -71,5 +81,18 @@ public class PlaceholderFragment extends Fragment {
         super.onResume();
         Log.d("change tab", pageViewModel.getUrl());
         API.SetPoint(pageViewModel.getUrl());
+        API.GetData getdata = new API.GetData();
+        getdata.addObserver(this);
+        getdata.Run();
+    }
+
+
+    @Override
+    public void update(Observable observable, Object o) {
+        if (observable instanceof API.Home) {
+            home data = (home) o;
+            if (data == null || data.endpoints == null)
+                Toast.makeText(mActivity, "Błąd połączenia", Toast.LENGTH_LONG).show();
+        }
     }
 }

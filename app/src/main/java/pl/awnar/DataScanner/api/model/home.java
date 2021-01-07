@@ -6,8 +6,8 @@ import android.os.Parcelable;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class home implements Parcelable{
-    public Map<String, Map<String,String>> endpoints;
+public class home implements Parcelable {
+    public Map<String, Map<String, String>> endpoints;
 
     protected home(Parcel in) {
         endpoints = new TreeMap<>();

@@ -3,7 +3,6 @@ package pl.awnar.DataScanner;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -86,7 +85,7 @@ public class LoginActivity extends AppCompatActivity implements Observer {
         });
 
         loginButton.setOnClickListener(view -> {
-            if(isdata()) return;
+            if (isdata()) return;
 
             String username = usernameEditText.getText().toString().trim();
             if (username.isEmpty()) {
@@ -103,7 +102,7 @@ public class LoginActivity extends AppCompatActivity implements Observer {
         });
 
         registerButton.setOnClickListener(view -> {
-            if(isdata()) return;
+            if (isdata()) return;
 
             String username = usernameEditText.getText().toString().trim();
             if (username.isEmpty()) {
@@ -119,7 +118,7 @@ public class LoginActivity extends AppCompatActivity implements Observer {
         });
 
         TextView.OnEditorActionListener editorListener = (v, actionId, event) -> {
-            if(isdata()) return false;
+            if (isdata()) return false;
 
             String username = usernameEditText.getText().toString().trim();
             if (username.isEmpty()) {
@@ -140,7 +139,7 @@ public class LoginActivity extends AppCompatActivity implements Observer {
         passwordEditText.setOnEditorActionListener(editorListener);
     }
 
-    private boolean isdata(){
+    private boolean isdata() {
         if (data != null && data.endpoints != null)
             return false;
         ((TextView) findViewById(R.id.ERROR)).setText(R.string.connect_error);
@@ -150,7 +149,7 @@ public class LoginActivity extends AppCompatActivity implements Observer {
     @Override
     public void update(Observable observable, Object o) {
         if (observable instanceof API.Home) {
-            data = (home)o;
+            data = (home) o;
             if (data == null || data.endpoints == null) {
                 data = null;
                 ((TextView) findViewById(R.id.ERROR)).setText(R.string.connect_error);
@@ -165,8 +164,8 @@ public class LoginActivity extends AppCompatActivity implements Observer {
             }
             loginRecive rec = (loginRecive) o;
             if (rec.ERROR == null) {
-                if (name==null){
-                    Toast.makeText(this, R.string.any_error,Toast.LENGTH_SHORT).show();
+                if (name == null) {
+                    Toast.makeText(this, R.string.any_error, Toast.LENGTH_SHORT).show();
                     return;
                 }
                 API.SetToken(rec.Authorization);
@@ -180,15 +179,15 @@ public class LoginActivity extends AppCompatActivity implements Observer {
         }
     }
 
-    private void prepareHome(home data){
+    private void prepareHome(home data) {
         ArrayList<String> toDelete = new ArrayList<>();
-        for (Map.Entry<String, Map<String,String>> entry : data.endpoints.entrySet()) {
+        for (Map.Entry<String, Map<String, String>> entry : data.endpoints.entrySet()) {
             if (entry.getValue().containsKey("name") && entry.getValue().containsKey("url"))
                 if (!entry.getValue().get("name").equals("") && !entry.getValue().get("url").equals(""))
                     continue;
             toDelete.add(entry.getKey());
         }
-        for (String object: toDelete)
+        for (String object : toDelete)
             data.endpoints.remove(object);
     }
 

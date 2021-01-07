@@ -1,6 +1,10 @@
 package pl.awnar.DataScanner.api;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.widget.Toast;
 
 import org.jetbrains.annotations.NotNull;
@@ -8,7 +12,8 @@ import org.jetbrains.annotations.NotNull;
 import java.security.MessageDigest;
 import java.util.Observable;
 
-import pl.awnar.DataScanner.LoginActivity;
+import pl.awnar.DataScanner.R;
+import pl.awnar.DataScanner.api.model.Data;
 import pl.awnar.DataScanner.api.model.home;
 import pl.awnar.DataScanner.api.model.loginRecive;
 import retrofit2.Call;
@@ -17,26 +22,29 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
+import retrofit2.http.Url;
 
 public class API {
     static private String TOKEN = "";
     static private String API_POINT = "";
     static final private String API_URL = "http://192.168.1.11:5000";
     @SuppressLint("StaticFieldLeak")
-    static private LoginActivity mActivity;
+    static private Activity mActivity;
     static private Retrofit retrofit = null;
 
     public static void Init() {
         retrofit = new Retrofit.Builder()
                 .baseUrl(API_URL)
                 .addConverterFactory(GsonConverterFactory.create())
+                //.client(okHttp)
                 .build();
     }
 
-    public static void SetActivbity(LoginActivity activity) {
+    public static void SetActivbity(Activity activity) {
         mActivity = activity;
     }
 
@@ -48,11 +56,21 @@ public class API {
         TOKEN = token;
     }
 
+    public static String getAppVersion(Context context) {
+        try {
+            PackageInfo packageInfo = context.getPackageManager()
+                    .getPackageInfo(context.getPackageName(), 0);
+            return mActivity.getString(R.string.app_name) + " " + packageInfo.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new RuntimeException("Could not get package name: " + e);
+        }
+    }
+
     public static class Home extends Observable implements Callback<home> {
         public void Run() {
             try {
                 homeIF req = retrofit.create(homeIF.class);
-                Call<home> call = req.HomeF();
+                Call<home> call = req.HomeF(getAppVersion(mActivity));
                 call.enqueue(this);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -80,7 +98,7 @@ public class API {
 
         private interface homeIF {
             @GET("/")
-            Call<home> HomeF();
+            Call<home> HomeF(@Header("User-Agent") String userAgent);
         }
     }
 
@@ -90,7 +108,7 @@ public class API {
                 MessageDigest md = MessageDigest.getInstance("MD5");
                 md.update(pass.getBytes());
                 LoginIF req = retrofit.create(LoginIF.class);
-                Call<loginRecive> call = req.loginIF(name, bytesToHex(md.digest()));
+                Call<loginRecive> call = req.loginIF(getAppVersion(mActivity), name, bytesToHex(md.digest()));
                 call.enqueue(this);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -132,6 +150,7 @@ public class API {
             @Multipart
             @POST("login")
             Call<loginRecive> loginIF(
+                    @Header("User-Agent") String userAgent,
                     @Part("name") String name,
                     @Part("pass") String pass
             );
@@ -144,7 +163,7 @@ public class API {
                 MessageDigest md = MessageDigest.getInstance("MD5");
                 md.update(pass.getBytes());
                 RegIF req = retrofit.create(RegIF.class);
-                Call<loginRecive> call = req.regIF(name, bytesToHex(md.digest()));
+                Call<loginRecive> call = req.regIF(getAppVersion(mActivity), name, bytesToHex(md.digest()));
                 call.enqueue(this);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -186,9 +205,49 @@ public class API {
             @Multipart
             @POST("register")
             Call<loginRecive> regIF(
+                    @Header("User-Agent") String userAgent,
                     @Part("name") String name,
                     @Part("pass") String pass
             );
+        }
+    }
+
+    public static class GetData extends Observable implements Callback<Data> {
+        public void Run() {
+            try {
+                DataIF req = retrofit.create(DataIF.class);
+                Call<Data> call = req.dataIF(API_POINT + "/", getAppVersion(mActivity), TOKEN);
+                call.enqueue(this);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Toast toast = Toast.makeText(mActivity.getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG);
+                toast.show();
+            }
+        }
+
+        @Override
+        public void onResponse(@NotNull Call<Data> call, Response<Data> response) {
+            setChanged();
+            if (response.isSuccessful())
+                notifyObservers(response.body());
+            else
+                notifyObservers(null);
+        }
+
+        @Override
+        public void onFailure(@NotNull Call<Data> call, Throwable t) {
+            setChanged();
+            notifyObservers(null);
+            Toast toast = Toast.makeText(mActivity.getApplicationContext(), t.getMessage(), Toast.LENGTH_LONG);
+            toast.show();
+        }
+
+        private interface DataIF {
+            @GET
+            Call<Data> dataIF(
+                    @Url String url,
+                    @Header("User-Agent") String userAgent,
+                    @Header("Authorization") String authorization);
         }
     }
 }

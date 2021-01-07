@@ -1,7 +1,6 @@
 package pl.awnar.DataScanner.ui.main;
 
 import android.content.Context;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -11,9 +10,6 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
-import java.util.Set;
-
-import pl.awnar.DataScanner.api.model.home;
 
 /**
  * A [FragmentPagerAdapter] that returns a fragment corresponding to
