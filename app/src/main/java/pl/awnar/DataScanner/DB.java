@@ -94,18 +94,20 @@ public class DB extends SQLiteOpenHelper {
         }
     }
 
-    public Map<Integer, String> getModules(){
+    public Map<Integer, String[]> getModules(){
         SQLiteDatabase DB = this.getWritableDatabase();
-        String[] columns = {ModuleColumns._ID, ModuleColumns.COLUMN_NAME_NAME};
+        String[] columns = {ModuleColumns._ID, ModuleColumns.COLUMN_NAME_NAME, ModuleColumns.COLUMN_NAME_URL};
         @SuppressLint("Recycle") Cursor cursor = DB.query(ModuleColumns.TABLE_NAME, columns, null, null, null, null, null);
 
-        Map<Integer, String> dbmap = new TreeMap<>();
+        Map<Integer, String[]> dbmap = new TreeMap<>();
         if (cursor.getCount() > 0) {
             cursor.moveToFirst();
             do {
                 int id = cursor.getInt(cursor.getColumnIndex(ModuleColumns._ID));
                 String name = cursor.getString(cursor.getColumnIndex(ModuleColumns.COLUMN_NAME_NAME));
-                dbmap.put(id, name);
+                String url = cursor.getString(cursor.getColumnIndex(ModuleColumns.COLUMN_NAME_URL));
+                String[] result = {name, url};
+                dbmap.put(id, result);
             } while (cursor.moveToNext());
         }
         return dbmap;
