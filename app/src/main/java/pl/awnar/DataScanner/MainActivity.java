@@ -2,26 +2,28 @@ package pl.awnar.DataScanner;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Base64;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
 
 import com.esafirm.imagepicker.features.ImagePicker;
-import com.esafirm.imagepicker.model.Image;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 
+import java.io.ByteArrayOutputStream;
+
 import pl.awnar.DataScanner.api.API;
+import pl.awnar.DataScanner.api.model.Data;
 import pl.awnar.DataScanner.api.model.home;
 import pl.awnar.DataScanner.ui.main.PlaceholderFragment;
 import pl.awnar.DataScanner.ui.main.SectionsPagerAdapter;
 
 public class MainActivity extends AppCompatActivity {
-
-    private Image image;
-    private SharedPreferences sharedPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         DB db = new DB(this);
-        sharedPref = getSharedPreferences("userInfo", MODE_PRIVATE);
+        SharedPreferences sharedPref = getSharedPreferences("userInfo", MODE_PRIVATE);
         String name = getIntent().getStringExtra("name");
         if (!name.equals(sharedPref.getString("user_name", "")))
             db.Clear();
@@ -46,6 +48,22 @@ public class MainActivity extends AppCompatActivity {
         TabLayout tabs = findViewById(R.id.tabs);
         tabs.setupWithViewPager(viewPager);
 
+        tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                tab = tab;
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+                tab = tab;
+            }
+        });
+
         FloatingActionButton fab = findViewById(R.id.fab);
 
         fab.setOnClickListener(view -> {
@@ -60,7 +78,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, final int resultCode, Intent data) {
         if (ImagePicker.shouldHandle(requestCode, resultCode, data)) {
-            image = ImagePicker.getFirstImageOrNull(data);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            BitmapFactory.decodeFile(ImagePicker.getFirstImageOrNull(data).getPath()).compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            Data.DataArray img = new Data.DataArray();
+            img.in_blob = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
+            img.in_blob_type = "IMG";
+            API.PostData post = new API.PostData();
+            post.Run(img);
         }
         super.onActivityResult(requestCode, resultCode, data);
     }

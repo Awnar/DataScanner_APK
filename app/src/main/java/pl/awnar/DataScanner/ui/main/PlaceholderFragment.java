@@ -20,6 +20,7 @@ import java.util.Observable;
 
 import pl.awnar.DataScanner.R;
 import pl.awnar.DataScanner.api.API;
+import pl.awnar.DataScanner.api.model.Data;
 import pl.awnar.DataScanner.api.model.home;
 
 /**
@@ -83,16 +84,26 @@ public class PlaceholderFragment extends Fragment implements java.util.Observer 
         API.SetPoint(pageViewModel.getUrl());
         API.GetData getdata = new API.GetData();
         getdata.addObserver(this);
-        getdata.Run();
+        getdata.Run(null);
     }
-
 
     @Override
     public void update(Observable observable, Object o) {
         if (observable instanceof API.Home) {
             home data = (home) o;
             if (data == null || data.endpoints == null)
-                Toast.makeText(mActivity, "Błąd połączenia", Toast.LENGTH_LONG).show();
+                Toast.makeText(mActivity, R.string.connect_error, Toast.LENGTH_LONG).show();
+        } else if (observable instanceof API.GetData) {
+            if (o == null) {
+                Toast.makeText(mActivity, R.string.connect_error, Toast.LENGTH_LONG).show();
+                return;
+            }
+            Data rec = (Data) o;
+            if (rec.ERROR == null) {
+
+            } else {
+                Toast.makeText(mActivity, rec.ERROR, Toast.LENGTH_LONG).show();
+            }
         }
     }
 }

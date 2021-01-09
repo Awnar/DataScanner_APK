@@ -26,6 +26,7 @@ import retrofit2.http.Header;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
+import retrofit2.http.Query;
 import retrofit2.http.Url;
 
 public class API {
@@ -213,10 +214,10 @@ public class API {
     }
 
     public static class GetData extends Observable implements Callback<Data> {
-        public void Run() {
+        public void Run(String lastsync) {
             try {
                 DataIF req = retrofit.create(DataIF.class);
-                Call<Data> call = req.dataIF(API_POINT + "/", getAppVersion(mActivity), TOKEN);
+                Call<Data> call = req.dataIF(API_POINT + "/", getAppVersion(mActivity), TOKEN, "lastsyncc");
                 call.enqueue(this);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -243,11 +244,54 @@ public class API {
         }
 
         private interface DataIF {
+            //@Multipart
             @GET
             Call<Data> dataIF(
                     @Url String url,
                     @Header("User-Agent") String userAgent,
-                    @Header("Authorization") String authorization);
+                    @Header("Authorization") String authorization,
+                    @Query("lastupdate") String lastupdate);
+        }
+    }
+
+    public static class PostData extends Observable implements Callback<Data> {
+        public void Run(Data.DataArray data) {
+            try {
+                DataIF req = retrofit.create(DataIF.class);
+                Call<Data> call = req.dataIF(API_POINT + "/", getAppVersion(mActivity), TOKEN, data);
+                call.enqueue(this);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Toast toast = Toast.makeText(mActivity.getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG);
+                toast.show();
+            }
+        }
+
+        @Override
+        public void onResponse(@NotNull Call<Data> call, Response<Data> response) {
+            setChanged();
+            if (response.isSuccessful())
+                notifyObservers(response.body());
+            else
+                notifyObservers(null);
+        }
+
+        @Override
+        public void onFailure(@NotNull Call<Data> call, Throwable t) {
+            setChanged();
+            notifyObservers(null);
+            Toast toast = Toast.makeText(mActivity.getApplicationContext(), t.getMessage(), Toast.LENGTH_LONG);
+            toast.show();
+        }
+
+        private interface DataIF {
+            @Multipart
+            @POST
+            Call<Data> dataIF(
+                    @Url String url,
+                    @Header("User-Agent") String userAgent,
+                    @Header("Authorization") String authorization,
+                    @Part("data") Data.DataArray data);
         }
     }
 }
