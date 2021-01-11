@@ -19,6 +19,7 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
     private final Context mContext;
     private final Map<Integer, String[]> data;
+    //private PlaceholderFragment mCurrentPrimaryItem;
 
     public SectionsPagerAdapter(Context context, FragmentManager fm, Map<Integer, String[]> data) {
         super(fm, FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);

@@ -12,7 +12,6 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.esafirm.imagepicker.features.ImagePicker;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 
 import java.io.ByteArrayOutputStream;
@@ -22,6 +21,7 @@ import pl.awnar.DataScanner.api.model.Data;
 import pl.awnar.DataScanner.api.model.home;
 import pl.awnar.DataScanner.ui.main.PlaceholderFragment;
 import pl.awnar.DataScanner.ui.main.SectionsPagerAdapter;
+import pl.awnar.DataScanner.ui.main.refreshHelper;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        API.SetActivbity(this);
         DB db = new DB(this);
         SharedPreferences sharedPref = getSharedPreferences("userInfo", MODE_PRIVATE);
         String name = getIntent().getStringExtra("name");
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
         db.Module(data);
 
         PlaceholderFragment.setActivity(this);
+        PlaceholderFragment.setDB(db);
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager(), db.getModules());
         ViewPager viewPager = findViewById(R.id.view_pager);
         viewPager.setAdapter(sectionsPagerAdapter);
@@ -51,7 +53,6 @@ public class MainActivity extends AppCompatActivity {
         tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                tab = tab;
             }
 
             @Override
@@ -60,19 +61,18 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
-                tab = tab;
+                //ViewPager X = findViewById(R.id.view_pager);
+                //X.notifyAll();
+                //int z = X.getAdapter().
+                // X=X;//.getAdapter().get
+                refreshHelper.getTab().onResume();
             }
         });
 
         FloatingActionButton fab = findViewById(R.id.fab);
-
         fab.setOnClickListener(view -> {
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
             ImagePicker.create(this).single().toolbarImageTitle("Dotknij by wybrać").start();
         });
-
-        API.SetActivbity(this);
     }
 
     @Override

@@ -14,6 +14,7 @@ import java.util.Observable;
 
 import pl.awnar.DataScanner.R;
 import pl.awnar.DataScanner.api.model.Data;
+import pl.awnar.DataScanner.api.model.Test;
 import pl.awnar.DataScanner.api.model.home;
 import pl.awnar.DataScanner.api.model.loginRecive;
 import retrofit2.Call;
@@ -32,7 +33,7 @@ import retrofit2.http.Url;
 public class API {
     static private String TOKEN = "";
     static private String API_POINT = "";
-    static final private String API_URL = "http://192.168.1.11:5000";
+    static final private String API_URL = "http://192.168.1.1:5000";//"http://192.168.43.89:5000";//"http://192.168.1.1:5000";//"http://192.168.1.11:5000";
     @SuppressLint("StaticFieldLeak")
     static private Activity mActivity;
     static private Retrofit retrofit = null;
@@ -41,7 +42,6 @@ public class API {
         retrofit = new Retrofit.Builder()
                 .baseUrl(API_URL)
                 .addConverterFactory(GsonConverterFactory.create())
-                //.client(okHttp)
                 .build();
     }
 
@@ -100,6 +100,44 @@ public class API {
         private interface homeIF {
             @GET("/")
             Call<home> HomeF(@Header("User-Agent") String userAgent);
+        }
+    }
+
+    public static class APItest extends Observable implements Callback<Test> {
+        public void Run(String key) {
+            try {
+                TestIF req = retrofit.create(TestIF.class);
+                Call<Test> call = req.testIF(getAppVersion(mActivity), key);
+                call.enqueue(this);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Toast toast = Toast.makeText(mActivity.getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG);
+                toast.show();
+            }
+        }
+
+        @Override
+        public void onResponse(@NotNull Call<Test> call, Response<Test> response) {
+            setChanged();
+            if (response.isSuccessful())
+                notifyObservers(response.body());
+            else
+                notifyObservers(null);
+        }
+
+        @Override
+        public void onFailure(@NotNull Call<Test> call, Throwable t) {
+            setChanged();
+            notifyObservers(null);
+            Toast toast = Toast.makeText(mActivity.getApplicationContext(), t.getMessage(), Toast.LENGTH_LONG);
+            toast.show();
+        }
+
+        private interface TestIF {
+            @GET("/Test")
+            Call<Test> testIF(
+                    @Header("User-Agent") String userAgent,
+                    @Header("Authorization") String authorization);
         }
     }
 
@@ -217,7 +255,7 @@ public class API {
         public void Run(String lastsync) {
             try {
                 DataIF req = retrofit.create(DataIF.class);
-                Call<Data> call = req.dataIF(API_POINT + "/", getAppVersion(mActivity), TOKEN, "lastsyncc");
+                Call<Data> call = req.dataIF(API_POINT + "/", getAppVersion(mActivity), TOKEN, lastsync);
                 call.enqueue(this);
             } catch (Exception e) {
                 e.printStackTrace();

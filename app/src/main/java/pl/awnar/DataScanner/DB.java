@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import pl.awnar.DataScanner.api.model.Data;
 import pl.awnar.DataScanner.api.model.home;
 
 public class DB extends SQLiteOpenHelper {
@@ -58,6 +59,7 @@ public class DB extends SQLiteOpenHelper {
                 contentValue.put(ModuleColumns._ID, entry.getKey());
                 contentValue.put(ModuleColumns.COLUMN_NAME_NAME, entry.getValue().get("name"));
                 contentValue.put(ModuleColumns.COLUMN_NAME_URL, entry.getValue().get("url"));
+                contentValue.put(ModuleColumns.COLUMN_NAME_LAST_SYNC, 0);
                 DB.insert(ModuleColumns.TABLE_NAME, null, contentValue);
             }
             return;
@@ -82,6 +84,7 @@ public class DB extends SQLiteOpenHelper {
             Map<String, String> tmp = data.endpoints.get(s);
             contentValue.put(ModuleColumns.COLUMN_NAME_NAME, tmp.get("name"));
             contentValue.put(ModuleColumns.COLUMN_NAME_URL, tmp.get("url"));
+            contentValue.put(ModuleColumns.COLUMN_NAME_LAST_SYNC, 0);
             DB.insert(ModuleColumns.TABLE_NAME, null, contentValue);
         }
 
@@ -95,8 +98,8 @@ public class DB extends SQLiteOpenHelper {
 
     public Map<Integer, String[]> getModules() {
         SQLiteDatabase DB = this.getWritableDatabase();
-        String[] columns = {ModuleColumns._ID, ModuleColumns.COLUMN_NAME_NAME, ModuleColumns.COLUMN_NAME_URL};
-        @SuppressLint("Recycle") Cursor cursor = DB.query(ModuleColumns.TABLE_NAME, columns, null, null, null, null, null);
+        String[] columns = {ModuleColumns._ID, ModuleColumns.COLUMN_NAME_NAME, ModuleColumns.COLUMN_NAME_URL, ModuleColumns.COLUMN_NAME_LAST_SYNC};
+        Cursor cursor = DB.query(ModuleColumns.TABLE_NAME, columns, null, null, null, null, null);
 
         Map<Integer, String[]> dbmap = new TreeMap<>();
         if (cursor.getCount() > 0) {
@@ -105,7 +108,8 @@ public class DB extends SQLiteOpenHelper {
                 int id = cursor.getInt(cursor.getColumnIndex(ModuleColumns._ID));
                 String name = cursor.getString(cursor.getColumnIndex(ModuleColumns.COLUMN_NAME_NAME));
                 String url = cursor.getString(cursor.getColumnIndex(ModuleColumns.COLUMN_NAME_URL));
-                String[] result = {name, url};
+                String date = cursor.getString(cursor.getColumnIndex(ModuleColumns.COLUMN_NAME_LAST_SYNC));
+                String[] result = {name, url, date};
                 dbmap.put(id, result);
             } while (cursor.moveToNext());
         }
@@ -117,6 +121,55 @@ public class DB extends SQLiteOpenHelper {
         DB.execSQL(SQL_DELETE_DATA);
         DB.execSQL(SQL_DELETE_MODULE);
         onCreate(DB);
+    }
+
+    public void lastSync(String moduleurl, String time) {
+        SQLiteDatabase DB = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(ModuleColumns.COLUMN_NAME_LAST_SYNC, time);
+        DB.update(ModuleColumns.TABLE_NAME, contentValues, ModuleColumns.COLUMN_NAME_URL + " = ?", new String[]{moduleurl});
+    }
+
+    public void updateData(String moduleurl, Data.DataArray[] data) {
+        SQLiteDatabase DB = this.getWritableDatabase();
+        String[] columns = {ModuleColumns._ID, ModuleColumns.COLUMN_NAME_URL};
+
+        Cursor module = DB.query(ModuleColumns.TABLE_NAME, columns, ModuleColumns.COLUMN_NAME_URL + " = ?", new String[]{moduleurl}, null, null, null);
+        if (module.getCount() <= 0)
+            return;
+        module.moveToFirst();
+        String moduleId = String.valueOf(module.getInt(module.getColumnIndex(ModuleColumns._ID)));
+
+        columns = new String[]{DataColumns._ID, DataColumns.COLUMN_NAME_SERVER_ID};
+        for (Data.DataArray object : data) {
+            Cursor cursor = DB.query(DataColumns.TABLE_NAME, columns, DataColumns.COLUMN_NAME_MODULE + " = ? AND " + DataColumns.COLUMN_NAME_SERVER_ID + " = ?", new String[]{moduleId, object.server_ID}, null, null, null);
+            if (cursor.getCount() <= 0) {
+                // instert
+
+                ContentValues contentValue = new ContentValues();
+                contentValue.put(DataColumns.COLUMN_NAME_IN_DATA, object.in_blob);
+                contentValue.put(DataColumns.COLUMN_NAME_IN_TYPE, object.in_blob_type);
+                contentValue.put(DataColumns.COLUMN_NAME_OUT_DATA, object.out_blob);
+                contentValue.put(DataColumns.COLUMN_NAME_OUT_TYPE, object.out_blob_type);
+                contentValue.put(DataColumns.COLUMN_NAME_CREATE, object.create);
+                contentValue.put(DataColumns.COLUMN_NAME_Update, object.update);
+                contentValue.put(DataColumns.COLUMN_NAME_SERVER_ID, object.server_ID);
+                contentValue.put(DataColumns.COLUMN_NAME_MODULE, moduleId);
+                DB.insert(DataColumns.TABLE_NAME, null, contentValue);
+
+                continue;
+            }
+            //update
+
+            ContentValues contentValue = new ContentValues();
+            contentValue.put(DataColumns.COLUMN_NAME_IN_DATA, object.in_blob);
+            contentValue.put(DataColumns.COLUMN_NAME_IN_TYPE, object.in_blob_type);
+            contentValue.put(DataColumns.COLUMN_NAME_OUT_DATA, object.out_blob);
+            contentValue.put(DataColumns.COLUMN_NAME_OUT_TYPE, object.out_blob_type);
+            contentValue.put(DataColumns.COLUMN_NAME_CREATE, object.create);
+            contentValue.put(DataColumns.COLUMN_NAME_Update, object.update);
+            DB.update(DataColumns.TABLE_NAME, contentValue, DataColumns.COLUMN_NAME_SERVER_ID + " = ? AND " + DataColumns.COLUMN_NAME_MODULE + " = ?", new String[]{object.server_ID, moduleId});
+        }
     }
 
     private static class DataColumns implements BaseColumns {
@@ -135,6 +188,7 @@ public class DB extends SQLiteOpenHelper {
         static final String TABLE_NAME = "Module";
         static final String COLUMN_NAME_NAME = "name";
         static final String COLUMN_NAME_URL = "url";
+        static final String COLUMN_NAME_LAST_SYNC = "sync";
     }
 
     private static final String SQL_CREATE_DATA =
@@ -151,9 +205,10 @@ public class DB extends SQLiteOpenHelper {
 
     private static final String SQL_CREATE_MODULE =
             "CREATE TABLE " + ModuleColumns.TABLE_NAME + " (" +
-                    ModuleColumns._ID + " INTEGER PRIMARY KEY," +
-                    ModuleColumns.COLUMN_NAME_NAME + " TEXT," +
-                    ModuleColumns.COLUMN_NAME_URL + " TEXT UNIQUE)";
+                    ModuleColumns._ID + " INTEGER PRIMARY KEY, " +
+                    ModuleColumns.COLUMN_NAME_NAME + " TEXT, " +
+                    ModuleColumns.COLUMN_NAME_URL + " TEXT UNIQUE, " +
+                    ModuleColumns.COLUMN_NAME_LAST_SYNC + " DATE)";
 
     private static final String SQL_DELETE_DATA =
             "DROP TABLE IF EXISTS " + DataColumns.TABLE_NAME;

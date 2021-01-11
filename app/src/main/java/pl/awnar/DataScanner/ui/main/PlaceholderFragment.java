@@ -18,6 +18,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import java.util.Observable;
 
+import pl.awnar.DataScanner.DB;
 import pl.awnar.DataScanner.R;
 import pl.awnar.DataScanner.api.API;
 import pl.awnar.DataScanner.api.model.Data;
@@ -32,6 +33,7 @@ public class PlaceholderFragment extends Fragment implements java.util.Observer 
     private static final String ARG_SECTION_URL = "section_url";
     @SuppressLint("StaticFieldLeak")
     private static Activity mActivity;
+    private static DB mdb;
     private PageViewModel pageViewModel;
 
     public static PlaceholderFragment newInstance(int index, String url) {
@@ -45,6 +47,10 @@ public class PlaceholderFragment extends Fragment implements java.util.Observer 
 
     public static void setActivity(Activity activity) {
         mActivity = activity;
+    }
+
+    public static void setDB(DB db) {
+        mdb = db;
     }
 
     @Override
@@ -80,11 +86,13 @@ public class PlaceholderFragment extends Fragment implements java.util.Observer 
     public void onResume() {
         // TODO update list
         super.onResume();
+        refreshHelper.setTab(this);
         Log.d("change tab", pageViewModel.getUrl());
         API.SetPoint(pageViewModel.getUrl());
         API.GetData getdata = new API.GetData();
         getdata.addObserver(this);
-        getdata.Run(null);
+        //TODO przetestować
+        getdata.Run(mdb.getModules().get(pageViewModel.getIndex() - 1)[2]);
     }
 
     @Override
@@ -100,10 +108,12 @@ public class PlaceholderFragment extends Fragment implements java.util.Observer 
             }
             Data rec = (Data) o;
             if (rec.ERROR == null) {
-
-            } else {
+                if (rec.Data == null || rec.TIME == null)
+                    return;
+                mdb.updateData(pageViewModel.getUrl(), rec.Data);
+                mdb.lastSync(pageViewModel.getUrl(), rec.TIME);
+            } else
                 Toast.makeText(mActivity, rec.ERROR, Toast.LENGTH_LONG).show();
-            }
         }
     }
 }

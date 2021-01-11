@@ -2,6 +2,7 @@ package pl.awnar.DataScanner;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -20,6 +21,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import pl.awnar.DataScanner.api.API;
+import pl.awnar.DataScanner.api.model.Test;
 import pl.awnar.DataScanner.api.model.home;
 import pl.awnar.DataScanner.api.model.loginRecive;
 
@@ -28,17 +30,27 @@ public class LoginActivity extends AppCompatActivity implements Observer {
 
     private home data;
     private String name;
+    private String key;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-
         API.Init();
         API.SetActivbity(this);
         API.Home home = new API.Home();
         home.addObserver(this);
         home.Run();
+
+        SharedPreferences sharedPref = getSharedPreferences("userInfo", MODE_PRIVATE);
+        key = sharedPref.getString("API_key", "");
+        if (!key.isEmpty()) {
+            API.APItest test = new API.APItest();
+            test.addObserver(this);
+            test.Run(key);
+            name = sharedPref.getString("user_name", "");
+        }
+
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
 
         API.Login login = new API.Login();
         login.addObserver(this);
@@ -137,6 +149,7 @@ public class LoginActivity extends AppCompatActivity implements Observer {
         };
 
         passwordEditText.setOnEditorActionListener(editorListener);
+        usernameEditText.setText(sharedPref.getString("user_name", ""));
     }
 
     private boolean isdata() {
@@ -148,6 +161,20 @@ public class LoginActivity extends AppCompatActivity implements Observer {
 
     @Override
     public void update(Observable observable, Object o) {
+        if (observable instanceof API.APItest) {
+            Test res = (Test) o;
+            if (res == null || res.OK == null) {
+                key = null;
+                return;
+            }
+            if (data == null || data.endpoints == null)
+                return;
+            API.SetToken(key);
+            Intent myIntent = new Intent(this, MainActivity.class);
+            myIntent.putExtra("home", data);
+            myIntent.putExtra("name", name);
+            startActivity(myIntent);
+        }
         if (observable instanceof API.Home) {
             data = (home) o;
             if (data == null || data.endpoints == null) {
@@ -169,6 +196,8 @@ public class LoginActivity extends AppCompatActivity implements Observer {
                     return;
                 }
                 API.SetToken(rec.Authorization);
+                SharedPreferences sharedPref = getSharedPreferences("userInfo", MODE_PRIVATE);
+                sharedPref.edit().putString("API_key", rec.Authorization).apply();
                 Intent myIntent = new Intent(this, MainActivity.class);
                 myIntent.putExtra("home", data);
                 myIntent.putExtra("name", name);
@@ -193,12 +222,9 @@ public class LoginActivity extends AppCompatActivity implements Observer {
 
     public static void hideKeyboard(Activity activity) {
         InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
-        //Find the currently focused view, so we can grab the correct window token from it.
         View view = activity.getCurrentFocus();
-        //If no view currently has focus, create a new one, just so we can grab a window token from it
-        if (view == null) {
+        if (view == null)
             view = new View(activity);
-        }
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 }
