@@ -79,7 +79,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, final int resultCode, Intent data) {
         if (ImagePicker.shouldHandle(requestCode, resultCode, data)) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            BitmapFactory.decodeFile(ImagePicker.getFirstImageOrNull(data).getPath()).compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            String path = ImagePicker.getFirstImageOrNull(data).getPath();
+            BitmapFactory.decodeFile(path).compress(Bitmap.CompressFormat.JPEG, 100, baos);
             Data.DataArray img = new Data.DataArray();
             img.in_blob = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
             img.in_blob_type = "IMG";

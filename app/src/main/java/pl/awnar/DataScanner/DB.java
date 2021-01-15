@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -168,8 +170,40 @@ public class DB extends SQLiteOpenHelper {
             contentValue.put(DataColumns.COLUMN_NAME_OUT_TYPE, object.out_blob_type);
             contentValue.put(DataColumns.COLUMN_NAME_CREATE, object.create);
             contentValue.put(DataColumns.COLUMN_NAME_Update, object.update);
+            contentValue.put(DataColumns.COLUMN_NAME_SERVER_ID, object.server_ID);
             DB.update(DataColumns.TABLE_NAME, contentValue, DataColumns.COLUMN_NAME_SERVER_ID + " = ? AND " + DataColumns.COLUMN_NAME_MODULE + " = ?", new String[]{object.server_ID, moduleId});
         }
+    }
+
+    public List<Data.DataArray> getData(String moduleurl) {
+        SQLiteDatabase DB = this.getWritableDatabase();
+        String[] columns = {ModuleColumns._ID, ModuleColumns.COLUMN_NAME_URL};
+
+        Cursor module = DB.query(ModuleColumns.TABLE_NAME, columns, ModuleColumns.COLUMN_NAME_URL + " = ?", new String[]{moduleurl}, null, null, null);
+        if (module.getCount() <= 0)
+            return null;
+        module.moveToFirst();
+        String moduleId = String.valueOf(module.getInt(module.getColumnIndex(ModuleColumns._ID)));
+
+        columns = new String[]{DataColumns.COLUMN_NAME_SERVER_ID, DataColumns.COLUMN_NAME_CREATE, DataColumns.COLUMN_NAME_IN_TYPE, DataColumns.COLUMN_NAME_IN_DATA, DataColumns.COLUMN_NAME_OUT_TYPE, DataColumns.COLUMN_NAME_OUT_DATA};
+        Cursor data = DB.query(DataColumns.TABLE_NAME, columns, DataColumns.COLUMN_NAME_MODULE + " = ?", new String[]{moduleId}, null, null, DataColumns.COLUMN_NAME_Update + " DESC");
+
+        List<Data.DataArray> dbmap = new LinkedList<>();
+        if (data.getCount() > 0) {
+            data.moveToFirst();
+            do {
+                Data.DataArray darray = new Data.DataArray();
+                //int tmmp = data.getInt(data.getColumnIndex(DataColumns.COLUMN_NAME_SERVER_ID));
+                //darray.server_ID = Integer.toString(tmmp);
+                darray.create = data.getString(data.getColumnIndex(DataColumns.COLUMN_NAME_CREATE));
+                darray.in_blob_type = data.getString(data.getColumnIndex(DataColumns.COLUMN_NAME_IN_TYPE));
+                darray.in_blob = data.getString(data.getColumnIndex(DataColumns.COLUMN_NAME_IN_DATA));
+                darray.out_blob_type = data.getString(data.getColumnIndex(DataColumns.COLUMN_NAME_OUT_TYPE));
+                darray.out_blob = data.getString(data.getColumnIndex(DataColumns.COLUMN_NAME_OUT_DATA));
+                dbmap.add(darray);
+            } while (data.moveToNext());
+        }
+        return dbmap;
     }
 
     private static class DataColumns implements BaseColumns {

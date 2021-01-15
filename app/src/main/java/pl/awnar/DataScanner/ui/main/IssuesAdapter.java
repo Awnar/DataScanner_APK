@@ -1,13 +1,20 @@
 package pl.awnar.DataScanner.ui.main;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.List;
 
+import pl.awnar.DataScanner.R;
 import pl.awnar.DataScanner.api.model.Data;
 
 class IssuesAdapter extends BaseAdapter {
@@ -19,8 +26,19 @@ class IssuesAdapter extends BaseAdapter {
         this.data = data;
     }
 
-    void addItems(List<Data.DataArray> data) {
+    void setItems(List<Data.DataArray> data) {
+        this.data.clear();
         this.data.addAll(data);
+    }
+
+    private void replaceView(View oldV, View newV) {
+        ViewGroup par = (ViewGroup) oldV.getParent();
+        if (par == null) {
+            return;
+        }
+        int i1 = par.indexOfChild(oldV);
+        par.removeViewAt(i1);
+        par.addView(newV, i1);
     }
 
     @Override
@@ -43,39 +61,80 @@ class IssuesAdapter extends BaseAdapter {
         ViewHolder holder;
         if (convertView == null) {
             holder = new ViewHolder();
-            //convertView = LayoutInflater.from(context).inflate(R.layout.list_item, null);
-            //holder.summary = convertView.findViewById(R.id.summary);
-            //holder.description = convertView.findViewById(R.id.description);
-            //holder.priority = convertView.findViewById(R.id.priority);
-            //holder.status = convertView.findViewById(R.id.status);
-            //holder.created_at = convertView.findViewById(R.id.created_at);
-            //holder.updated_at = convertView.findViewById(R.id.updated_at);
-            //holder.projekt = convertView.findViewById(R.id.projekt);
+            convertView = LayoutInflater.from(context).inflate(R.layout.list_item, null);
+            holder.create = convertView.findViewById(R.id.create);
+            LinearLayout layout = convertView.findViewById(R.id.linearLayout);
+
+            int tmp = layout.getHeight();
+
+            switch (data.get(position).in_blob_type) {
+                case "TXT":
+                    holder.in = new TextView(context);
+                    break;
+                case "IMG":
+                    holder.in = new ImageView(context);
+                    break;
+            }
+            switch (data.get(position).out_blob_type) {
+                case "TXT":
+                    holder.out = new TextView(context);
+                    break;
+                case "IMG":
+                    holder.out = new ImageView(context);
+                    break;
+            }
+
+            replaceView(convertView.findViewById(R.id.view), holder.in);
+            replaceView(convertView.findViewById(R.id.view2), holder.out);
+
+            ViewGroup.LayoutParams tmp2 = holder.in.getLayoutParams();
+            //tmp2.height = tmp/2;
+            holder.in.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+
+            tmp2 = holder.out.getLayoutParams();
+            //tmp2.height = tmp/2;
+            holder.out.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        //holder.summary.setText(data.get(position).summary);
-        //if (data.get(position).description.length() < 120)
-        //    holder.description.setText(data.get(position).description);
-        //else
-        //    holder.description.setText(data.get(position).description.substring(0, 117) + "...");
-        //holder.priority.setText(data.get(position).priority.label);
-        //holder.status.setText(data.get(position).status.label);
-        //holder.created_at.setText(data.get(position).created_at.replaceAll("T|(\\+.*)", " "));
-        //holder.updated_at.setText(data.get(position).updated_at.replaceAll("T|(\\+.*)", " "));
-        //holder.projekt.setText(data.get(position).project.name);
+        holder.create.setText(data.get(position).create);
+
+        if (data.get(position).in_blob != null)
+            switch (data.get(position).in_blob_type) {
+                case "TXT":
+                    if (data.get(position).in_blob.length() < 120)
+                        ((TextView) holder.in).setText(data.get(position).in_blob);
+                    else
+                        ((TextView) holder.in).setText(data.get(position).in_blob.substring(0, 117) + "...");
+                    break;
+                case "IMG":
+                    byte[] decodedString = Base64.decode(data.get(position).in_blob, Base64.DEFAULT);
+                    Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                    ((ImageView) holder.in).setImageBitmap(decodedByte);
+            }
+
+        if (data.get(position).out_blob != null)
+            switch (data.get(position).out_blob_type) {
+                case "TXT":
+                    if (data.get(position).out_blob.length() < 120)
+                        ((TextView) holder.out).setText(data.get(position).out_blob);
+                    else
+                        ((TextView) holder.out).setText(data.get(position).out_blob.substring(0, 117) + "...");
+                    break;
+                case "IMG":
+                    byte[] decodedString = Base64.decode(data.get(position).out_blob, Base64.DEFAULT);
+                    Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                    ((ImageView) holder.out).setImageBitmap(decodedByte);
+            }
         return convertView;
     }
 
     class ViewHolder {
-        TextView summary;
-        TextView description;
-        TextView projekt;
-        TextView priority;
-        TextView status;
-        TextView created_at;
-        TextView updated_at;
+        TextView create;
+        View in;
+        View out;
     }
 }

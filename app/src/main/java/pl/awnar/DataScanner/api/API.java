@@ -33,7 +33,7 @@ import retrofit2.http.Url;
 public class API {
     static private String TOKEN = "";
     static private String API_POINT = "";
-    static final private String API_URL = "http://192.168.1.1:5000";//"http://192.168.43.89:5000";//"http://192.168.1.1:5000";//"http://192.168.1.11:5000";
+    static final private String API_URL = "http://192.168.1.11:5000";//"http://192.168.43.89:5000";//"http://192.168.1.11:5000";
     @SuppressLint("StaticFieldLeak")
     static private Activity mActivity;
     static private Retrofit retrofit = null;
