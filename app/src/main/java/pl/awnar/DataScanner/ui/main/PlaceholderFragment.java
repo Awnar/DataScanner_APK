@@ -94,6 +94,10 @@ public class PlaceholderFragment extends Fragment implements java.util.Observer 
         super.onResume();
         refreshHelper.setTab(this);
         Log.d("change tab", pageViewModel.getUrl());
+        refresh();
+    }
+
+    private void refresh() {
         API.SetPoint(pageViewModel.getUrl());
         API.GetData getdata = new API.GetData();
         getdata.addObserver(this);
@@ -122,6 +126,7 @@ public class PlaceholderFragment extends Fragment implements java.util.Observer 
                 adapter.notifyDataSetChanged();
             } else
                 Toast.makeText(mActivity, rec.ERROR, Toast.LENGTH_LONG).show();
-        }
+        } else if (observable instanceof API.PostData)
+            refresh();
     }
 }
