@@ -78,13 +78,12 @@ public class PlaceholderFragment extends Fragment implements java.util.Observer 
         adapter = new IssuesAdapter(root.getContext(), new ArrayList<Data.DataArray>());
         ListView listView = root.findViewById(R.id.listView);
         listView.setAdapter(adapter);
-        listView.setOnItemClickListener((adapterView, view, position, l) -> {
+        /*listView.setOnItemClickListener((adapterView, view, position, l) -> {
             Toast.makeText(root.getContext(), "zzzzzzzzz", Toast.LENGTH_LONG).show();
             //Intent item = new Intent(MainActivity.this, ItemActivity.class);
             //item.putExtra("data", new Gson().toJson(adapter.data.get(position)));
             //MainActivity.this.startActivity(item);
-        });
-
+        });*/
         return root;
     }
 
