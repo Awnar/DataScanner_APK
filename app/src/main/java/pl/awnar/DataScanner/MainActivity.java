@@ -6,11 +6,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Base64;
+import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
 
 import com.esafirm.imagepicker.features.ImagePicker;
+import com.esafirm.imagepicker.features.ReturnMode;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 
@@ -43,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
         PlaceholderFragment.setActivity(this);
         PlaceholderFragment.setDB(db);
-        SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager(), db.getModules());
+        SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), db.getModules());
         ViewPager viewPager = findViewById(R.id.view_pager);
         viewPager.setAdapter(sectionsPagerAdapter);
 
@@ -61,17 +63,17 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
-                //ViewPager X = findViewById(R.id.view_pager);
-                //X.notifyAll();
-                //int z = X.getAdapter().
-                // X=X;//.getAdapter().get
                 refreshHelper.getTab().onResume();
             }
         });
 
         FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(view -> {
-            ImagePicker.create(this).single().toolbarImageTitle("Dotknij by wybrać").start();
+        fab.setOnClickListener(view -> ImagePicker.create(this).single().toolbarImageTitle("Dotknij by wybrać").returnMode(ReturnMode.ALL).start());
+
+        final Button settingsButton = findViewById(R.id.settings);
+        settingsButton.setOnClickListener(view -> {
+            Intent myIntent = new Intent(this, Settings.class);
+            startActivity(myIntent);
         });
     }
 
@@ -81,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             String path = ImagePicker.getFirstImageOrNull(data).getPath();
             BitmapFactory.decodeFile(path).compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            Data.DataArray img = new Data.DataArray();
+            Data img = new Data();
             img.in_blob = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
             img.in_blob_type = "IMG";
             API.PostData post = new API.PostData();

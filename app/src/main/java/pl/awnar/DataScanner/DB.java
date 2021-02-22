@@ -101,7 +101,7 @@ public class DB extends SQLiteOpenHelper {
     public Map<Integer, String[]> getModules() {
         SQLiteDatabase DB = this.getWritableDatabase();
         String[] columns = {ModuleColumns._ID, ModuleColumns.COLUMN_NAME_NAME, ModuleColumns.COLUMN_NAME_URL, ModuleColumns.COLUMN_NAME_LAST_SYNC};
-        Cursor cursor = DB.query(ModuleColumns.TABLE_NAME, columns, null, null, null, null, null);
+        @SuppressLint("Recycle") Cursor cursor = DB.query(ModuleColumns.TABLE_NAME, columns, null, null, null, null, null);
 
         Map<Integer, String[]> dbmap = new TreeMap<>();
         if (cursor.getCount() > 0) {
@@ -110,7 +110,7 @@ public class DB extends SQLiteOpenHelper {
                 int id = cursor.getInt(cursor.getColumnIndex(ModuleColumns._ID));
                 String name = cursor.getString(cursor.getColumnIndex(ModuleColumns.COLUMN_NAME_NAME));
                 String url = cursor.getString(cursor.getColumnIndex(ModuleColumns.COLUMN_NAME_URL));
-                String date = cursor.getString(cursor.getColumnIndex(ModuleColumns.COLUMN_NAME_LAST_SYNC));
+                String date = Long.toString(cursor.getLong(cursor.getColumnIndex(ModuleColumns.COLUMN_NAME_LAST_SYNC)));
                 String[] result = {name, url, date};
                 dbmap.put(id, result);
             } while (cursor.moveToNext());
@@ -125,6 +125,13 @@ public class DB extends SQLiteOpenHelper {
         onCreate(DB);
     }
 
+    public void ClearSynchr() {
+        SQLiteDatabase DB = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(ModuleColumns.COLUMN_NAME_LAST_SYNC, 0);
+        DB.update(ModuleColumns.TABLE_NAME, contentValues, null, null);
+    }
+
     public void lastSync(String moduleurl, String time) {
         SQLiteDatabase DB = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -132,7 +139,7 @@ public class DB extends SQLiteOpenHelper {
         DB.update(ModuleColumns.TABLE_NAME, contentValues, ModuleColumns.COLUMN_NAME_URL + " = ?", new String[]{moduleurl});
     }
 
-    public void updateData(String moduleurl, Data.DataArray[] data) {
+    public void updateData(String moduleurl, Data data) {
         SQLiteDatabase DB = this.getWritableDatabase();
         String[] columns = {ModuleColumns._ID, ModuleColumns.COLUMN_NAME_URL};
 
@@ -143,39 +150,33 @@ public class DB extends SQLiteOpenHelper {
         String moduleId = String.valueOf(module.getInt(module.getColumnIndex(ModuleColumns._ID)));
 
         columns = new String[]{DataColumns._ID, DataColumns.COLUMN_NAME_SERVER_ID};
-        for (Data.DataArray object : data) {
-            Cursor cursor = DB.query(DataColumns.TABLE_NAME, columns, DataColumns.COLUMN_NAME_MODULE + " = ? AND " + DataColumns.COLUMN_NAME_SERVER_ID + " = ?", new String[]{moduleId, object.server_ID}, null, null, null);
-            if (cursor.getCount() <= 0) {
-                // instert
-
-                ContentValues contentValue = new ContentValues();
-                contentValue.put(DataColumns.COLUMN_NAME_IN_DATA, object.in_blob);
-                contentValue.put(DataColumns.COLUMN_NAME_IN_TYPE, object.in_blob_type);
-                contentValue.put(DataColumns.COLUMN_NAME_OUT_DATA, object.out_blob);
-                contentValue.put(DataColumns.COLUMN_NAME_OUT_TYPE, object.out_blob_type);
-                contentValue.put(DataColumns.COLUMN_NAME_CREATE, object.create);
-                contentValue.put(DataColumns.COLUMN_NAME_Update, object.update);
-                contentValue.put(DataColumns.COLUMN_NAME_SERVER_ID, object.server_ID);
-                contentValue.put(DataColumns.COLUMN_NAME_MODULE, moduleId);
-                DB.insert(DataColumns.TABLE_NAME, null, contentValue);
-
-                continue;
-            }
-            //update
-
+        Cursor cursor = DB.query(DataColumns.TABLE_NAME, columns, DataColumns.COLUMN_NAME_MODULE + " = ? AND " + DataColumns.COLUMN_NAME_SERVER_ID + " = ?", new String[]{moduleId, data.server_ID}, null, null, null);
+        if (cursor.getCount() <= 0) {
+            // instert
             ContentValues contentValue = new ContentValues();
-            contentValue.put(DataColumns.COLUMN_NAME_IN_DATA, object.in_blob);
-            contentValue.put(DataColumns.COLUMN_NAME_IN_TYPE, object.in_blob_type);
-            contentValue.put(DataColumns.COLUMN_NAME_OUT_DATA, object.out_blob);
-            contentValue.put(DataColumns.COLUMN_NAME_OUT_TYPE, object.out_blob_type);
-            contentValue.put(DataColumns.COLUMN_NAME_CREATE, object.create);
-            contentValue.put(DataColumns.COLUMN_NAME_Update, object.update);
-            contentValue.put(DataColumns.COLUMN_NAME_SERVER_ID, object.server_ID);
-            DB.update(DataColumns.TABLE_NAME, contentValue, DataColumns.COLUMN_NAME_SERVER_ID + " = ? AND " + DataColumns.COLUMN_NAME_MODULE + " = ?", new String[]{object.server_ID, moduleId});
+            contentValue.put(DataColumns.COLUMN_NAME_IN_DATA, data.in_blob);
+            contentValue.put(DataColumns.COLUMN_NAME_IN_TYPE, data.in_blob_type);
+            contentValue.put(DataColumns.COLUMN_NAME_OUT_DATA, data.out_blob);
+            contentValue.put(DataColumns.COLUMN_NAME_OUT_TYPE, data.out_blob_type);
+            contentValue.put(DataColumns.COLUMN_NAME_CREATE, data.create);
+            contentValue.put(DataColumns.COLUMN_NAME_Update, data.update);
+            contentValue.put(DataColumns.COLUMN_NAME_SERVER_ID, data.server_ID);
+            contentValue.put(DataColumns.COLUMN_NAME_MODULE, moduleId);
+            DB.insert(DataColumns.TABLE_NAME, null, contentValue);
         }
+        //update
+        ContentValues contentValue = new ContentValues();
+        contentValue.put(DataColumns.COLUMN_NAME_IN_DATA, data.in_blob);
+        contentValue.put(DataColumns.COLUMN_NAME_IN_TYPE, data.in_blob_type);
+        contentValue.put(DataColumns.COLUMN_NAME_OUT_DATA, data.out_blob);
+        contentValue.put(DataColumns.COLUMN_NAME_OUT_TYPE, data.out_blob_type);
+        contentValue.put(DataColumns.COLUMN_NAME_CREATE, data.create);
+        contentValue.put(DataColumns.COLUMN_NAME_Update, data.update);
+        contentValue.put(DataColumns.COLUMN_NAME_SERVER_ID, data.server_ID);
+        DB.update(DataColumns.TABLE_NAME, contentValue, DataColumns.COLUMN_NAME_SERVER_ID + " = ? AND " + DataColumns.COLUMN_NAME_MODULE + " = ?", new String[]{data.server_ID, moduleId});
     }
 
-    public List<Data.DataArray> getData(String moduleurl) {
+    public List<Data> getData(String moduleurl) {
         SQLiteDatabase DB = this.getWritableDatabase();
         String[] columns = {ModuleColumns._ID, ModuleColumns.COLUMN_NAME_URL};
 
@@ -188,13 +189,12 @@ public class DB extends SQLiteOpenHelper {
         columns = new String[]{DataColumns.COLUMN_NAME_SERVER_ID, DataColumns.COLUMN_NAME_CREATE, DataColumns.COLUMN_NAME_IN_TYPE, DataColumns.COLUMN_NAME_IN_DATA, DataColumns.COLUMN_NAME_OUT_TYPE, DataColumns.COLUMN_NAME_OUT_DATA};
         Cursor data = DB.query(DataColumns.TABLE_NAME, columns, DataColumns.COLUMN_NAME_MODULE + " = ?", new String[]{moduleId}, null, null, DataColumns.COLUMN_NAME_Update + " DESC");
 
-        List<Data.DataArray> dbmap = new LinkedList<>();
+        List<Data> dbmap = new LinkedList<>();
         if (data.getCount() > 0) {
             data.moveToFirst();
             do {
-                Data.DataArray darray = new Data.DataArray();
-                //int tmmp = data.getInt(data.getColumnIndex(DataColumns.COLUMN_NAME_SERVER_ID));
-                //darray.server_ID = Integer.toString(tmmp);
+                Data darray = new Data();
+                darray.server_ID = Integer.toString(data.getColumnIndex(DataColumns.COLUMN_NAME_SERVER_ID));
                 darray.create = data.getString(data.getColumnIndex(DataColumns.COLUMN_NAME_CREATE));
                 darray.in_blob_type = data.getString(data.getColumnIndex(DataColumns.COLUMN_NAME_IN_TYPE));
                 darray.in_blob = data.getString(data.getColumnIndex(DataColumns.COLUMN_NAME_IN_DATA));

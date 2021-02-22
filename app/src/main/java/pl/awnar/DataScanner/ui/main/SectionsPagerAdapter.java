@@ -1,7 +1,5 @@
 package pl.awnar.DataScanner.ui.main;
 
-import android.content.Context;
-
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -17,21 +15,16 @@ import java.util.Map;
  */
 public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
-    private final Context mContext;
     private final Map<Integer, String[]> data;
-    //private PlaceholderFragment mCurrentPrimaryItem;
 
-    public SectionsPagerAdapter(Context context, FragmentManager fm, Map<Integer, String[]> data) {
+    public SectionsPagerAdapter(FragmentManager fm, Map<Integer, String[]> data) {
         super(fm, FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
-        mContext = context;
         this.data = data;
     }
 
     @NotNull
     @Override
     public Fragment getItem(int position) {
-        // getItem is called to instantiate the fragment for the given page.
-        // Return a PlaceholderFragment (defined as a static inner class below).
         int key = (int) data.keySet().toArray()[position];
         return PlaceholderFragment.newInstance(position + 1, data.get(key)[1]);
     }

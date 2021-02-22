@@ -1,5 +1,6 @@
 package pl.awnar.DataScanner.ui.main;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -18,15 +19,15 @@ import pl.awnar.DataScanner.R;
 import pl.awnar.DataScanner.api.model.Data;
 
 class IssuesAdapter extends BaseAdapter {
-    private Context context;
-    List<Data.DataArray> data;
+    private final Context context;
+    List<Data> data;
 
-    IssuesAdapter(Context context, List<Data.DataArray> data) {
+    IssuesAdapter(Context context, List<Data> data) {
         this.context = context;
         this.data = data;
     }
 
-    void setItems(List<Data.DataArray> data) {
+    void setItems(List<Data> data) {
         this.data.clear();
         this.data.addAll(data);
     }
@@ -56,6 +57,7 @@ class IssuesAdapter extends BaseAdapter {
         return position;
     }
 
+    @SuppressLint({"InflateParams", "SetTextI18n"})
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
@@ -63,9 +65,6 @@ class IssuesAdapter extends BaseAdapter {
             holder = new ViewHolder();
             convertView = LayoutInflater.from(context).inflate(R.layout.list_item, null);
             holder.create = convertView.findViewById(R.id.create);
-            LinearLayout layout = convertView.findViewById(R.id.linearLayout);
-
-            int tmp = layout.getHeight();
 
             switch (data.get(position).in_blob_type) {
                 case "TXT":
@@ -73,6 +72,7 @@ class IssuesAdapter extends BaseAdapter {
                     break;
                 case "IMG":
                     holder.in = new ImageView(context);
+                    ((ImageView) holder.in).setScaleType(ImageView.ScaleType.CENTER_INSIDE);
                     break;
             }
             switch (data.get(position).out_blob_type) {
@@ -81,18 +81,14 @@ class IssuesAdapter extends BaseAdapter {
                     break;
                 case "IMG":
                     holder.out = new ImageView(context);
+                    ((ImageView) holder.out).setScaleType(ImageView.ScaleType.CENTER_INSIDE);
                     break;
             }
 
             replaceView(convertView.findViewById(R.id.view), holder.in);
             replaceView(convertView.findViewById(R.id.view2), holder.out);
 
-            ViewGroup.LayoutParams tmp2 = holder.in.getLayoutParams();
-            //tmp2.height = tmp/2;
             holder.in.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
-
-            tmp2 = holder.out.getLayoutParams();
-            //tmp2.height = tmp/2;
             holder.out.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
 
             convertView.setTag(holder);
@@ -132,7 +128,7 @@ class IssuesAdapter extends BaseAdapter {
         return convertView;
     }
 
-    class ViewHolder {
+    static class ViewHolder {
         TextView create;
         View in;
         View out;

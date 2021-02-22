@@ -21,6 +21,7 @@ import pl.awnar.DataScanner.DB;
 import pl.awnar.DataScanner.R;
 import pl.awnar.DataScanner.api.API;
 import pl.awnar.DataScanner.api.model.Data;
+import pl.awnar.DataScanner.api.model.List;
 import pl.awnar.DataScanner.api.model.home;
 
 /**
@@ -35,6 +36,7 @@ public class PlaceholderFragment extends Fragment implements java.util.Observer 
     private static DB mdb;
     private PageViewModel pageViewModel;
     private IssuesAdapter adapter;
+    private int last_id;
 
     public static PlaceholderFragment newInstance(int index, String url) {
         PlaceholderFragment fragment = new PlaceholderFragment();
@@ -75,7 +77,7 @@ public class PlaceholderFragment extends Fragment implements java.util.Observer 
         //final TextView textView = root.findViewById(R.id.section_label);
         //pageViewModel.getText().observe(this, s -> textView.setText(s));
 
-        adapter = new IssuesAdapter(root.getContext(), new ArrayList<Data.DataArray>());
+        adapter = new IssuesAdapter(root.getContext(), new ArrayList<>());
         ListView listView = root.findViewById(R.id.listView);
         listView.setAdapter(adapter);
         /*listView.setOnItemClickListener((adapterView, view, position, l) -> {
@@ -89,7 +91,6 @@ public class PlaceholderFragment extends Fragment implements java.util.Observer 
 
     @Override
     public void onResume() {
-        // TODO update list
         super.onResume();
         refreshHelper.setTab(this);
         Log.d("change tab", pageViewModel.getUrl());
@@ -97,8 +98,9 @@ public class PlaceholderFragment extends Fragment implements java.util.Observer 
     }
 
     private void refresh() {
+        Log.d("refresh", pageViewModel.getUrl());
         API.SetPoint(pageViewModel.getUrl());
-        API.GetData getdata = new API.GetData();
+        API.GetList getdata = new API.GetList();
         getdata.addObserver(this);
         //TODO przetestować
         getdata.Run(mdb.getModules().get(pageViewModel.getIndex() - 1)[2]);
@@ -110,21 +112,42 @@ public class PlaceholderFragment extends Fragment implements java.util.Observer 
             home data = (home) o;
             if (data == null || data.endpoints == null)
                 Toast.makeText(mActivity, R.string.connect_error, Toast.LENGTH_LONG).show();
-        } else if (observable instanceof API.GetData) {
+        } else if (observable instanceof API.GetList) {
+            if (o == null) {
+                Toast.makeText(mActivity, R.string.connect_error, Toast.LENGTH_LONG).show();
+                return;
+            }
+            List rec = (List) o;
+            if (rec.ERROR == null) {
+                if (rec.Data == null || rec.TIME == null)
+                    return;
+                /*mdb.updateData(pageViewModel.getUrl(), rec.Data);
+                mdb.lastSync(pageViewModel.getUrl(), rec.TIME);
+                adapter.setItems(mdb.getData(pageViewModel.getUrl()));
+                adapter.notifyDataSetChanged();*/
+                mdb.lastSync(pageViewModel.getUrl(), rec.TIME);
+                last_id = 0;
+                for (int item : rec.Data) {
+                    API.SetPoint(pageViewModel.getUrl());
+                    API.GetItem api = new API.GetItem();
+                    api.addObserver(this);
+                    api.Run(item);
+                    last_id++;
+                }
+            } else
+                Toast.makeText(mActivity, rec.ERROR, Toast.LENGTH_LONG).show();
+        } else if (observable instanceof API.GetItem) {
             if (o == null) {
                 Toast.makeText(mActivity, R.string.connect_error, Toast.LENGTH_LONG).show();
                 return;
             }
             Data rec = (Data) o;
-            if (rec.ERROR == null) {
-                if (rec.Data == null || rec.TIME == null)
-                    return;
-                mdb.updateData(pageViewModel.getUrl(), rec.Data);
-                mdb.lastSync(pageViewModel.getUrl(), rec.TIME);
-                adapter.setItems(mdb.getData(pageViewModel.getUrl()));
-                adapter.notifyDataSetChanged();
-            } else
-                Toast.makeText(mActivity, rec.ERROR, Toast.LENGTH_LONG).show();
+            if (rec.server_ID == null) return;
+            mdb.updateData(pageViewModel.getUrl(), rec);
+            //if(--last_id<=0) {
+            adapter.setItems(mdb.getData(pageViewModel.getUrl()));
+            adapter.notifyDataSetChanged();
+            //}
         } else if (observable instanceof API.PostData)
             refresh();
     }

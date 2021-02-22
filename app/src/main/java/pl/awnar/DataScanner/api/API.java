@@ -14,6 +14,7 @@ import java.util.Observable;
 
 import pl.awnar.DataScanner.R;
 import pl.awnar.DataScanner.api.model.Data;
+import pl.awnar.DataScanner.api.model.List;
 import pl.awnar.DataScanner.api.model.Test;
 import pl.awnar.DataScanner.api.model.home;
 import pl.awnar.DataScanner.api.model.loginRecive;
@@ -33,7 +34,7 @@ import retrofit2.http.Url;
 public class API {
     static private String TOKEN = "";
     static private String API_POINT = "";
-    static final private String API_URL = "http://192.168.1.11:5000";//"http://192.168.43.89:5000";//"http://192.168.1.11:5000";
+    static final private String API_URL = "http://192.168.1.11:5000";
     @SuppressLint("StaticFieldLeak")
     static private Activity mActivity;
     static private Retrofit retrofit = null;
@@ -251,11 +252,52 @@ public class API {
         }
     }
 
-    public static class GetData extends Observable implements Callback<Data> {
+    public static class GetList extends Observable implements Callback<List> {
         public void Run(String lastsync) {
             try {
                 DataIF req = retrofit.create(DataIF.class);
-                Call<Data> call = req.dataIF(API_POINT + "/", getAppVersion(mActivity), TOKEN, lastsync);
+                Call<List> call = req.dataIF(API_POINT + "/", getAppVersion(mActivity), TOKEN, lastsync);
+                call.enqueue(this);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Toast toast = Toast.makeText(mActivity.getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG);
+                toast.show();
+            }
+        }
+
+        @Override
+        public void onResponse(@NotNull Call<List> call, Response<List> response) {
+            setChanged();
+            if (response.isSuccessful())
+                notifyObservers(response.body());
+            else
+                notifyObservers(null);
+        }
+
+        @Override
+        public void onFailure(@NotNull Call<List> call, Throwable t) {
+            setChanged();
+            notifyObservers(null);
+            Toast toast = Toast.makeText(mActivity.getApplicationContext(), t.getMessage(), Toast.LENGTH_LONG);
+            toast.show();
+        }
+
+        private interface DataIF {
+            //@Multipart
+            @GET
+            Call<List> dataIF(
+                    @Url String url,
+                    @Header("User-Agent") String userAgent,
+                    @Header("Authorization") String authorization,
+                    @Query("lastupdate") String lastupdate);
+        }
+    }
+
+    public static class GetItem extends Observable implements Callback<Data> {
+        public void Run(int id) {
+            try {
+                ItemIF req = retrofit.create(ItemIF.class);
+                Call<Data> call = req.itemIF(API_POINT + "/" + id, getAppVersion(mActivity), TOKEN);
                 call.enqueue(this);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -281,19 +323,18 @@ public class API {
             toast.show();
         }
 
-        private interface DataIF {
+        private interface ItemIF {
             //@Multipart
             @GET
-            Call<Data> dataIF(
+            Call<Data> itemIF(
                     @Url String url,
                     @Header("User-Agent") String userAgent,
-                    @Header("Authorization") String authorization,
-                    @Query("lastupdate") String lastupdate);
+                    @Header("Authorization") String authorization);
         }
     }
 
     public static class PostData extends Observable implements Callback<Data> {
-        public void Run(Data.DataArray data) {
+        public void Run(Data data) {
             try {
                 DataIF req = retrofit.create(DataIF.class);
                 Call<Data> call = req.dataIF(API_POINT + "/", getAppVersion(mActivity), TOKEN, data);
@@ -329,7 +370,43 @@ public class API {
                     @Url String url,
                     @Header("User-Agent") String userAgent,
                     @Header("Authorization") String authorization,
-                    @Part("data") Data.DataArray data);
+                    @Part("data") Data data);
+        }
+    }
+
+    public static class Logout extends Observable implements Callback<loginRecive> {
+        public void Run() {
+            try {
+                LogoutIF req = retrofit.create(LogoutIF.class);
+                Call<loginRecive> call = req.logoutIF();
+                call.enqueue(this);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Toast toast = Toast.makeText(mActivity.getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG);
+                toast.show();
+            }
+        }
+
+        @Override
+        public void onResponse(@NotNull Call<loginRecive> call, Response<loginRecive> response) {
+            setChanged();
+            if (response.isSuccessful())
+                notifyObservers(response.body());
+            else
+                notifyObservers(null);
+        }
+
+        @Override
+        public void onFailure(@NotNull Call<loginRecive> call, Throwable t) {
+            setChanged();
+            notifyObservers(null);
+            Toast toast = Toast.makeText(mActivity.getApplicationContext(), t.getMessage(), Toast.LENGTH_LONG);
+            toast.show();
+        }
+
+        private interface LogoutIF {
+            @POST("logout")
+            Call<loginRecive> logoutIF();
         }
     }
 }

@@ -31,6 +31,7 @@ public class LoginActivity extends AppCompatActivity implements Observer {
     private home data;
     private String name;
     private String key;
+    private boolean login = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -167,13 +168,16 @@ public class LoginActivity extends AppCompatActivity implements Observer {
                 key = null;
                 return;
             }
-            if (data == null || data.endpoints == null)
+            if (data == null || data.endpoints == null) {
+                login = true;
                 return;
+            }
             API.SetToken(key);
             Intent myIntent = new Intent(this, MainActivity.class);
             myIntent.putExtra("home", data);
             myIntent.putExtra("name", name);
             startActivity(myIntent);
+            finish();
         }
         if (observable instanceof API.Home) {
             data = (home) o;
@@ -183,6 +187,14 @@ public class LoginActivity extends AppCompatActivity implements Observer {
                 return;
             }
             prepareHome(data);
+            if (login) {
+                API.SetToken(key);
+                Intent myIntent = new Intent(this, MainActivity.class);
+                myIntent.putExtra("home", data);
+                myIntent.putExtra("name", name);
+                startActivity(myIntent);
+                finish();
+            }
         }
         if (observable instanceof API.Login || observable instanceof API.Register) {
             if (o == null) {
@@ -202,13 +214,14 @@ public class LoginActivity extends AppCompatActivity implements Observer {
                 myIntent.putExtra("home", data);
                 myIntent.putExtra("name", name);
                 startActivity(myIntent);
+                finish();
             } else {
                 ((TextView) findViewById(R.id.ERROR)).setText(rec.ERROR);
             }
         }
     }
 
-    private void prepareHome(home data) {
+    public static void prepareHome(home data) {
         ArrayList<String> toDelete = new ArrayList<>();
         for (Map.Entry<String, Map<String, String>> entry : data.endpoints.entrySet()) {
             if (entry.getValue().containsKey("name") && entry.getValue().containsKey("url"))
