@@ -89,6 +89,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
             img.in_blob = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
             img.in_blob_type = "IMG";
             API.PostData post = new API.PostData();
+            post.addObserver(this);
             post.Run(img);
         }
         super.onActivityResult(requestCode, resultCode, data);
