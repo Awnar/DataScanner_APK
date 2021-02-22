@@ -84,7 +84,22 @@ public class MainActivity extends AppCompatActivity implements Observer {
         if (ImagePicker.shouldHandle(requestCode, resultCode, data)) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             String path = ImagePicker.getFirstImageOrNull(data).getPath();
-            BitmapFactory.decodeFile(path).compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            //BitmapFactory.decodeFile(path).compress(Bitmap.CompressFormat.JPEG, 0, baos);
+
+            Bitmap b = BitmapFactory.decodeFile(path);
+            int origWidth = b.getWidth();
+            int origHeight = b.getHeight();
+            int newWidth, newHeight;
+            if (origWidth > origHeight) {
+                newHeight = 200 * origHeight / origWidth;
+                newWidth = 200;
+            } else {
+                newWidth = 200 * origWidth / origHeight;
+                newHeight = 200;
+            }
+            Bitmap b2 = Bitmap.createScaledBitmap(b, newWidth, newHeight, false);
+            b2.compress(Bitmap.CompressFormat.JPEG, 70, baos);
+
             Data img = new Data();
             img.in_blob = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
             img.in_blob_type = "IMG";
