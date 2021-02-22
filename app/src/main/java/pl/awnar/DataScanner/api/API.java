@@ -32,9 +32,9 @@ import retrofit2.http.Query;
 import retrofit2.http.Url;
 
 public class API {
+    static final private String API_URL = "http://192.168.1.11:5000";
     static private String TOKEN = "";
     static private String API_POINT = "";
-    static final private String API_URL = "http://192.168.1.11:5000";
     @SuppressLint("StaticFieldLeak")
     static private Activity mActivity;
     static private Retrofit retrofit = null;
@@ -143,6 +143,18 @@ public class API {
     }
 
     public static class Login extends Observable implements Callback<loginRecive> {
+        private static String bytesToHex(byte[] hash) {
+            StringBuilder hexString = new StringBuilder(2 * hash.length);
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        }
+
         public void Run(String name, String pass) {
             try {
                 MessageDigest md = MessageDigest.getInstance("MD5");
@@ -155,18 +167,6 @@ public class API {
                 Toast toast = Toast.makeText(mActivity.getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG);
                 toast.show();
             }
-        }
-
-        private static String bytesToHex(byte[] hash) {
-            StringBuilder hexString = new StringBuilder(2 * hash.length);
-            for (byte b : hash) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) {
-                    hexString.append('0');
-                }
-                hexString.append(hex);
-            }
-            return hexString.toString();
         }
 
         @Override
@@ -198,6 +198,18 @@ public class API {
     }
 
     public static class Register extends Observable implements Callback<loginRecive> {
+        private static String bytesToHex(byte[] hash) {
+            StringBuilder hexString = new StringBuilder(2 * hash.length);
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        }
+
         public void Run(String name, String pass) {
             try {
                 MessageDigest md = MessageDigest.getInstance("MD5");
@@ -210,18 +222,6 @@ public class API {
                 Toast toast = Toast.makeText(mActivity.getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG);
                 toast.show();
             }
-        }
-
-        private static String bytesToHex(byte[] hash) {
-            StringBuilder hexString = new StringBuilder(2 * hash.length);
-            for (byte b : hash) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) {
-                    hexString.append('0');
-                }
-                hexString.append(hex);
-            }
-            return hexString.toString();
         }
 
         @Override

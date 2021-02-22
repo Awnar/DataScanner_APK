@@ -29,6 +29,16 @@ class IssuesAdapter extends BaseAdapter {
 
     void setItems(List<Data> data) {
         this.data.clear();
+        for (Data item : data) {
+            if (item.in_blob == null) {
+                item.in_blob_type = "TXT";
+                item.in_blob = "Pusto";
+            }
+            if (item.out_blob == null) {
+                item.out_blob_type = "TXT";
+                item.out_blob = "Pusto";
+            }
+        }
         this.data.addAll(data);
     }
 

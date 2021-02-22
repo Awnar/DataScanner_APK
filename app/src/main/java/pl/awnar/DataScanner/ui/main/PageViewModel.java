@@ -11,12 +11,12 @@ public class PageViewModel extends ViewModel {
     private final LiveData<String> mText = Transformations.map(mIndex, input -> "Hello world from section: " + input);
     private String url;
 
-    public void setIndex(int index) {
-        mIndex.setValue(index);
-    }
-
     public int getIndex() {
         return mIndex.getValue();
+    }
+
+    public void setIndex(int index) {
+        mIndex.setValue(index);
     }
 
     public LiveData<String> getText() {

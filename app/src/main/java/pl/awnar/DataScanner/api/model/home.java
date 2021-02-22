@@ -7,6 +7,17 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class home implements Parcelable {
+    public static final Creator<home> CREATOR = new Creator<home>() {
+        @Override
+        public home createFromParcel(Parcel in) {
+            return new home(in);
+        }
+
+        @Override
+        public home[] newArray(int size) {
+            return new home[size];
+        }
+    };
     public Map<String, Map<String, String>> endpoints;
 
     protected home(Parcel in) {
@@ -23,16 +34,4 @@ public class home implements Parcelable {
     public int describeContents() {
         return 0;
     }
-
-    public static final Creator<home> CREATOR = new Creator<home>() {
-        @Override
-        public home createFromParcel(Parcel in) {
-            return new home(in);
-        }
-
-        @Override
-        public home[] newArray(int size) {
-            return new home[size];
-        }
-    };
 }

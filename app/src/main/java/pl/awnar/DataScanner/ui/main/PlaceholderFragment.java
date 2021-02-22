@@ -47,18 +47,17 @@ public class PlaceholderFragment extends Fragment implements java.util.Observer 
         return fragment;
     }
 
-
-    public void ClearAdapter() {
-        adapter.Clear();
-        adapter.notifyDataSetChanged();
-    }
-
     public static void setActivity(Activity activity) {
         mActivity = activity;
     }
 
     public static void setDB(DB db) {
         mdb = db;
+    }
+
+    public void ClearAdapter() {
+        adapter.Clear();
+        adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -105,6 +104,10 @@ public class PlaceholderFragment extends Fragment implements java.util.Observer 
 
     private void refresh() {
         Log.d("refresh", pageViewModel.getUrl());
+        java.util.List<Data> data = mdb.getData(pageViewModel.getUrl());
+        adapter.setItems(data);
+        adapter.notifyDataSetChanged();
+                
         API.SetPoint(pageViewModel.getUrl());
         API.GetList getdata = new API.GetList();
         getdata.addObserver(this);

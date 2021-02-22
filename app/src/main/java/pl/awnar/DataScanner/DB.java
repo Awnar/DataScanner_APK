@@ -20,6 +20,27 @@ import pl.awnar.DataScanner.api.model.home;
 public class DB extends SQLiteOpenHelper {
     static final private Integer DB_VER = 1;
     private static final String DATABASE_NAME = "Data.db";
+    private static final String SQL_CREATE_DATA =
+            "CREATE TABLE " + DataColumns.TABLE_NAME + " (" +
+                    DataColumns._ID + " INTEGER PRIMARY KEY," +
+                    DataColumns.COLUMN_NAME_SERVER_ID + " INTEGER UNIQUE," +
+                    DataColumns.COLUMN_NAME_MODULE + " INTEGER REFERENCES " + ModuleColumns.TABLE_NAME + " (" + ModuleColumns._ID + ")," +
+                    DataColumns.COLUMN_NAME_IN_DATA + " BLOB," +
+                    DataColumns.COLUMN_NAME_IN_TYPE + " TEXT," +
+                    DataColumns.COLUMN_NAME_OUT_DATA + " BLOB," +
+                    DataColumns.COLUMN_NAME_OUT_TYPE + " TEXT," +
+                    DataColumns.COLUMN_NAME_CREATE + " DATE," +
+                    DataColumns.COLUMN_NAME_Update + " DATE)";
+    private static final String SQL_CREATE_MODULE =
+            "CREATE TABLE " + ModuleColumns.TABLE_NAME + " (" +
+                    ModuleColumns._ID + " INTEGER PRIMARY KEY, " +
+                    ModuleColumns.COLUMN_NAME_NAME + " TEXT, " +
+                    ModuleColumns.COLUMN_NAME_URL + " TEXT UNIQUE, " +
+                    ModuleColumns.COLUMN_NAME_LAST_SYNC + " DATE)";
+    private static final String SQL_DELETE_DATA =
+            "DROP TABLE IF EXISTS " + DataColumns.TABLE_NAME;
+    private static final String SQL_DELETE_MODULE =
+            "DROP TABLE IF EXISTS " + ModuleColumns.TABLE_NAME;
 
     public DB(Context context) {
         super(context, DATABASE_NAME, null, DB_VER);
@@ -163,17 +184,18 @@ public class DB extends SQLiteOpenHelper {
             contentValue.put(DataColumns.COLUMN_NAME_SERVER_ID, data.server_ID);
             contentValue.put(DataColumns.COLUMN_NAME_MODULE, moduleId);
             DB.insert(DataColumns.TABLE_NAME, null, contentValue);
+        } else {
+            //update
+            ContentValues contentValue = new ContentValues();
+            contentValue.put(DataColumns.COLUMN_NAME_IN_DATA, data.in_blob);
+            contentValue.put(DataColumns.COLUMN_NAME_IN_TYPE, data.in_blob_type);
+            contentValue.put(DataColumns.COLUMN_NAME_OUT_DATA, data.out_blob);
+            contentValue.put(DataColumns.COLUMN_NAME_OUT_TYPE, data.out_blob_type);
+            contentValue.put(DataColumns.COLUMN_NAME_CREATE, data.create);
+            contentValue.put(DataColumns.COLUMN_NAME_Update, data.update);
+            contentValue.put(DataColumns.COLUMN_NAME_SERVER_ID, data.server_ID);
+            DB.update(DataColumns.TABLE_NAME, contentValue, DataColumns.COLUMN_NAME_SERVER_ID + " = ? AND " + DataColumns.COLUMN_NAME_MODULE + " = ?", new String[]{data.server_ID, moduleId});
         }
-        //update
-        ContentValues contentValue = new ContentValues();
-        contentValue.put(DataColumns.COLUMN_NAME_IN_DATA, data.in_blob);
-        contentValue.put(DataColumns.COLUMN_NAME_IN_TYPE, data.in_blob_type);
-        contentValue.put(DataColumns.COLUMN_NAME_OUT_DATA, data.out_blob);
-        contentValue.put(DataColumns.COLUMN_NAME_OUT_TYPE, data.out_blob_type);
-        contentValue.put(DataColumns.COLUMN_NAME_CREATE, data.create);
-        contentValue.put(DataColumns.COLUMN_NAME_Update, data.update);
-        contentValue.put(DataColumns.COLUMN_NAME_SERVER_ID, data.server_ID);
-        DB.update(DataColumns.TABLE_NAME, contentValue, DataColumns.COLUMN_NAME_SERVER_ID + " = ? AND " + DataColumns.COLUMN_NAME_MODULE + " = ?", new String[]{data.server_ID, moduleId});
     }
 
     public List<Data> getData(String moduleurl) {
@@ -224,29 +246,4 @@ public class DB extends SQLiteOpenHelper {
         static final String COLUMN_NAME_URL = "url";
         static final String COLUMN_NAME_LAST_SYNC = "sync";
     }
-
-    private static final String SQL_CREATE_DATA =
-            "CREATE TABLE " + DataColumns.TABLE_NAME + " (" +
-                    DataColumns._ID + " INTEGER PRIMARY KEY," +
-                    DataColumns.COLUMN_NAME_SERVER_ID + " INTEGER UNIQUE," +
-                    DataColumns.COLUMN_NAME_MODULE + " INTEGER REFERENCES " + ModuleColumns.TABLE_NAME + " (" + ModuleColumns._ID + ")," +
-                    DataColumns.COLUMN_NAME_IN_DATA + " BLOB," +
-                    DataColumns.COLUMN_NAME_IN_TYPE + " TEXT," +
-                    DataColumns.COLUMN_NAME_OUT_DATA + " BLOB," +
-                    DataColumns.COLUMN_NAME_OUT_TYPE + " TEXT," +
-                    DataColumns.COLUMN_NAME_CREATE + " DATE," +
-                    DataColumns.COLUMN_NAME_Update + " DATE)";
-
-    private static final String SQL_CREATE_MODULE =
-            "CREATE TABLE " + ModuleColumns.TABLE_NAME + " (" +
-                    ModuleColumns._ID + " INTEGER PRIMARY KEY, " +
-                    ModuleColumns.COLUMN_NAME_NAME + " TEXT, " +
-                    ModuleColumns.COLUMN_NAME_URL + " TEXT UNIQUE, " +
-                    ModuleColumns.COLUMN_NAME_LAST_SYNC + " DATE)";
-
-    private static final String SQL_DELETE_DATA =
-            "DROP TABLE IF EXISTS " + DataColumns.TABLE_NAME;
-
-    private static final String SQL_DELETE_MODULE =
-            "DROP TABLE IF EXISTS " + ModuleColumns.TABLE_NAME;
 }

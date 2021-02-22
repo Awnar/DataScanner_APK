@@ -33,6 +33,26 @@ public class LoginActivity extends AppCompatActivity implements Observer {
     private String key;
     private boolean login = false;
 
+    public static void prepareHome(home data) {
+        ArrayList<String> toDelete = new ArrayList<>();
+        for (Map.Entry<String, Map<String, String>> entry : data.endpoints.entrySet()) {
+            if (entry.getValue().containsKey("name") && entry.getValue().containsKey("url"))
+                if (!entry.getValue().get("name").equals("") && !entry.getValue().get("url").equals(""))
+                    continue;
+            toDelete.add(entry.getKey());
+        }
+        for (String object : toDelete)
+            data.endpoints.remove(object);
+    }
+
+    public static void hideKeyboard(Activity activity) {
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        View view = activity.getCurrentFocus();
+        if (view == null)
+            view = new View(activity);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         API.Init();
@@ -219,25 +239,5 @@ public class LoginActivity extends AppCompatActivity implements Observer {
                 ((TextView) findViewById(R.id.ERROR)).setText(rec.ERROR);
             }
         }
-    }
-
-    public static void prepareHome(home data) {
-        ArrayList<String> toDelete = new ArrayList<>();
-        for (Map.Entry<String, Map<String, String>> entry : data.endpoints.entrySet()) {
-            if (entry.getValue().containsKey("name") && entry.getValue().containsKey("url"))
-                if (!entry.getValue().get("name").equals("") && !entry.getValue().get("url").equals(""))
-                    continue;
-            toDelete.add(entry.getKey());
-        }
-        for (String object : toDelete)
-            data.endpoints.remove(object);
-    }
-
-    public static void hideKeyboard(Activity activity) {
-        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
-        View view = activity.getCurrentFocus();
-        if (view == null)
-            view = new View(activity);
-        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 }
