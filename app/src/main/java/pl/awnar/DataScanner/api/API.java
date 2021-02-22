@@ -378,7 +378,7 @@ public class API {
         public void Run() {
             try {
                 LogoutIF req = retrofit.create(LogoutIF.class);
-                Call<loginRecive> call = req.logoutIF();
+                Call<loginRecive> call = req.logoutIF(getAppVersion(mActivity), TOKEN);
                 call.enqueue(this);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -406,7 +406,10 @@ public class API {
 
         private interface LogoutIF {
             @POST("logout")
-            Call<loginRecive> logoutIF();
+            Call<loginRecive> logoutIF(
+                    @Header("User-Agent") String userAgent,
+                    @Header("Authorization") String authorization
+            );
         }
     }
 }

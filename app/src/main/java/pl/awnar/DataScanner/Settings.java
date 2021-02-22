@@ -1,6 +1,7 @@
 package pl.awnar.DataScanner;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 
@@ -45,6 +46,8 @@ public class Settings extends AppCompatActivity implements Observer {
     @Override
     public void update(Observable observable, Object o) {
         if (observable instanceof API.Logout) {
+            SharedPreferences sharedPref = getSharedPreferences("userInfo", MODE_PRIVATE);
+            sharedPref.edit().putString("API_key", null).apply();
             Intent myIntent = new Intent(this, LoginActivity.class);
             startActivity(myIntent);
             finish();

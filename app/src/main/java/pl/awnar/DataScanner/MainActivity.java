@@ -17,6 +17,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Observable;
+import java.util.Observer;
 
 import pl.awnar.DataScanner.api.API;
 import pl.awnar.DataScanner.api.model.Data;
@@ -25,7 +27,7 @@ import pl.awnar.DataScanner.ui.main.PlaceholderFragment;
 import pl.awnar.DataScanner.ui.main.SectionsPagerAdapter;
 import pl.awnar.DataScanner.ui.main.refreshHelper;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements Observer {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,5 +92,11 @@ public class MainActivity extends AppCompatActivity {
             post.Run(img);
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void update(Observable observable, Object o) {
+        if (observable instanceof API.PostData)
+            refreshHelper.getTab().onResume();
     }
 }
