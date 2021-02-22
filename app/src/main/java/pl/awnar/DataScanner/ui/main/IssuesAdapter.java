@@ -32,6 +32,10 @@ class IssuesAdapter extends BaseAdapter {
         this.data.addAll(data);
     }
 
+    public void Clear() {
+        this.data.clear();
+    }
+
     private void replaceView(View oldV, View newV) {
         ViewGroup par = (ViewGroup) oldV.getParent();
         if (par == null) {

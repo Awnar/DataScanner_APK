@@ -12,6 +12,7 @@ import java.util.Observer;
 
 import pl.awnar.DataScanner.api.API;
 import pl.awnar.DataScanner.api.model.home;
+import pl.awnar.DataScanner.ui.main.refreshHelper;
 
 public class Settings extends AppCompatActivity implements Observer {
 
@@ -40,6 +41,7 @@ public class Settings extends AppCompatActivity implements Observer {
             API.Home home = new API.Home();
             home.addObserver(this);
             home.Run();
+            refreshHelper.getTab().ClearAdapter();
         });
     }
 

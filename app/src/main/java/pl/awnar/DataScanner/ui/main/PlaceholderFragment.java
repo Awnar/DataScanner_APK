@@ -47,6 +47,12 @@ public class PlaceholderFragment extends Fragment implements java.util.Observer 
         return fragment;
     }
 
+
+    public void ClearAdapter() {
+        adapter.Clear();
+        adapter.notifyDataSetChanged();
+    }
+
     public static void setActivity(Activity activity) {
         mActivity = activity;
     }
