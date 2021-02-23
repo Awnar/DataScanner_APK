@@ -91,15 +91,18 @@ public class DB extends SQLiteOpenHelper {
         if (dbmap.equals(data.endpoints))
             return;
 
+        Clear();
+
         Set<String> keysData = data.endpoints.keySet();
-        Set<String> keysDB = dbmap.keySet();
-        keysData.removeAll(dbmap.keySet());
+        /*Set<String> keysDB = dbmap.keySet();
         keysDB.removeAll(data.endpoints.keySet());
 
         for (String s : keysDB) {
             DB.delete(DataColumns.TABLE_NAME, DataColumns.COLUMN_NAME_MODULE + "=" + s, null);
             DB.delete(ModuleColumns.TABLE_NAME, ModuleColumns._ID + "=" + s, null);
         }
+
+        keysData.removeAll(dbmap.keySet());*/
 
         for (String s : keysData) {
             ContentValues contentValue = new ContentValues();

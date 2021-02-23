@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Observable;
 
 import pl.awnar.DataScanner.DB;
@@ -107,12 +108,15 @@ public class PlaceholderFragment extends Fragment implements java.util.Observer 
         java.util.List<Data> data = mdb.getData(pageViewModel.getUrl());
         adapter.setItems(data);
         adapter.notifyDataSetChanged();
-                
+
         API.SetPoint(pageViewModel.getUrl());
         API.GetList getdata = new API.GetList();
         getdata.addObserver(this);
-        //TODO przetestować
-        getdata.Run(mdb.getModules().get(pageViewModel.getIndex() - 1)[2]);
+
+        int tmp1 = pageViewModel.getIndex() - 1;
+        Map<Integer, String[]> tmp2 = mdb.getModules();
+        String[][] tmp3 = tmp2.values().toArray(new String[0][0]);
+        getdata.Run(tmp3[tmp1][2]);
     }
 
     @Override
